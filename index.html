@@ -143,63 +143,62 @@
   <h2>Built like a tool, not a feed.</h2>
   <p class="section-sub">Everything a browser needs, nothing it doesn't.
   Every surface stays quiet so the web stays loud.</p>
-  <div class="grid">
+    <div class="grid">
     <div class="card">
       <div class="ic">&#8801;</div>
       <h3>Adaptive tabs</h3>
-      <p>Chrome-style compression: tabs shrink smoothly from 220px down to
-      icon-only as you open more. Overflow scrolls horizontally.</p>
+      <p>Tab width recalculates live — 220px down to 46px icon-only. Below
+      75px the close button hides, below 55px the title does. Overflow scrolls.</p>
     </div>
     <div class="card">
       <div class="ic">&#9707;</div>
       <h3>Split view</h3>
-      <p>Two pages side by side in one tab with an active-pane focus ring.
-      Perfect for docs on the left, work on the right.</p>
+      <p><kbd>Ctrl+\</kbd> opens a second pane beside the first — independent
+      navigation, ember ring marks the focused side.</p>
     </div>
     <div class="card">
       <div class="ic">&#9884;</div>
-      <h3>Shields built in</h3>
-      <p>EasyList and EasyPrivacy filtering at the network layer ??ads and
-      trackers never reach the page. Toggle anytime.</p>
+      <h3>Ad &amp; tracker blocking</h3>
+      <p>EasyList + EasyPrivacy rules fetched at startup and applied in the
+      network layer. Badge in the menu shows it working.</p>
     </div>
     <div class="card">
       <div class="ic">&#9681;</div>
-      <h3>Dark &amp; light</h3>
-      <p>A real theme system: chrome, internal pages and web
-      <code>prefers-color-scheme</code> all switch together.</p>
+      <h3>Dark &amp; light themes</h3>
+      <p>One switch in <code>pyxis://settings</code> re-themes the shell,
+      internal pages and sites via <code>prefers-color-scheme</code>.</p>
     </div>
     <div class="card">
       <div class="ic v">&#9673;</div>
       <h3>Incognito tabs</h3>
-      <p>Isolated session profile marked in violet. Nothing persists ??
-      history, cookies and cache vanish on close.</p>
+      <p><kbd>Ctrl+Shift+N</kbd> — violet-tinted tabs on an isolated profile.
+      History, cookies and cache are dropped on close.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9734;</div>
+      <h3>Bookmarks bar</h3>
+      <p><kbd>Ctrl+Shift+B</kbd> toggles the strip; star button saves pages,
+      persisted to local JSON. Uniform ember bookmark marks.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9719;</div>
+      <h3>History dashboard</h3>
+      <p><kbd>Ctrl+H</kbd> opens <code>pyxis://history</code> — searchable
+      timeline, per-entry delete, clear-all, open-in-split.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#8595;</div>
+      <h3>Downloads panel</h3>
+      <p><kbd>Ctrl+J</kbd> drops a flyout with live progress bars for active
+      downloads and a finished-files list.</p>
     </div>
     <div class="card">
       <div class="ic">&#8984;</div>
       <h3>Keyboard-first</h3>
-      <p><kbd>Ctrl+\</kbd> split, <kbd>Ctrl+H</kbd> history, <kbd>Ctrl+J</kbd>
-      downloads, <kbd>Ctrl+Shift+B</kbd> bookmarks bar. Keep typing.</p>
+      <p><kbd>Ctrl+T</kbd> <kbd>Ctrl+\</kbd> <kbd>Ctrl+L</kbd> <kbd>Ctrl+H</kbd>
+      <kbd>Ctrl+J</kbd> <kbd>Ctrl+Shift+B</kbd> <kbd>F5</kbd> — full control without the mouse.</p>
     </div>
-    <div class="card">
-      <div class="ic">&#8599;</div>
-      <h3>Internal pages</h3>
-      <p><code>pyxis://newtab</code>, <code>pyxis://history</code> and
-      <code>pyxis://settings</code> render offline, instantly.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9729;</div>
-      <h3>Remote start page</h3>
-      <p>The new-tab page can sync from a deployed URL ??update the site,
-      every install picks it up on next launch.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#8595;</div>
-      <h3>Chromium inside</h3>
-      <p>WebView2 runtime: the same engine as Edge, packaged in ~1 MB of
-      your own code. No Electron shell, no bloat.</p>
-    </div>
-  </div>
-</div></section>
+  </div></div></section>
 
 <footer><div class="wrap foot">
   <a class="logo" href="#"><span>P</span>yxis</a>
