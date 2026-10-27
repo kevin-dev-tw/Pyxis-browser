@@ -3,181 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>New Tab</title>
-<style>:root{--accent:#E0703A;--accent-hover:#EA7E48;--accent-active:#C96027;--accent-soft:#F8A068;--selection:rgba(224,112,58,.4);--ring:rgba(224,112,58,.22);--accent-shadow:rgba(224,112,58,.3);--accent-shadow-lg:rgba(224,112,58,.45);--glow-strong:rgba(224,112,58,.08);--glow-soft:rgba(224,112,58,.02);--bg:#0c0c0e;--dot:rgba(255,255,255,.05);--ink:#e4e4e7;--ink-strong:#f4f4f5;--mute:#9c9ca6;--mute2:#7c7c86;--glass:rgba(22,22,27,.85);--glass-border:rgba(255,255,255,.08);--glass-border-hover:rgba(255,255,255,.14);--glass-inset:rgba(255,255,255,.06);--surface:#141418;--surface-hover:#1a1a20;--border:#26262c;--card:#16161b;--card-border:#2a2a32;--kbd-bg:#18181d;--kbd-border:#27272e;--danger:#f87171;--danger-bg:#221618;--danger-border:#3f1f24;--danger-solid:#c2410c;--danger-solid-hover:#ea580c;--shadow-sm:0 10px 30px -5px rgba(0,0,0,.5);--shadow-md:0 14px 38px -5px rgba(0,0,0,.6);--shadow-lg:0 16px 40px -5px rgba(0,0,0,.65);--modal-bg:rgba(0,0,0,.65);--title-shadow:0 4px 20px rgba(0,0,0,.5)}
-{{THEME_VARS}}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-::selection {
-background: var(--selection);
-color: #ffffff;
-}
-body {
-min-height: 100vh;
-display: flex; flex-direction: column;
-align-items: center; justify-content: center;
-background-color: var(--bg);
-/* Ambient radial glow + subtle blueprint dot grid */
-background-image:
-radial-gradient(circle at 50% 48%, var(--glow-strong) 0%, var(--glow-soft) 36%, transparent 68%),
-radial-gradient(var(--dot) 1px, transparent 1px);
-background-size: 100% 100%, 28px 28px;
-color: var(--ink);
-font-family: "Segoe UI Variable Text", "Segoe UI", -apple-system, system-ui, sans-serif;
-padding: 24px;
-position: relative;
-overflow: hidden;
-}
+<title>Pyxis — A personal Chromium workstation</title>
+<meta name="description" content="Pyxis is a minimalist Chromium browser for Windows. Adaptive tabs, split view, ad blocking, dark and light themes, and keyboard-first navigation.">
+<style>
+  :root{
+    --bg:#0c0c0e; --panel:#131316; --raised:#1b1b1f; --elevated:#232329;
+    --ink:#e4e4e7; --ink-strong:#f4f4f5; --mute:#9c9ca6; --mute2:#7c7c86;
+    --border:#26262c; --card:#16161b;
+    --accent:#e0703a; --accent-hover:#ea7e48; --accent-active:#c96027;
+    --purple:#a78bfa;
+    --glow:rgba(224,112,58,.08); --glow2:rgba(224,112,58,.02);
+    --dot:rgba(255,255,255,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -10%, var(--glow) 0%, var(--glow2) 40%, transparent 70%),
+      radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size:100% 100%,28px 28px;
+    min-height:100vh;
+  }
+  ::selection{background:rgba(224,112,58,.4);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
 
-/* Ambient corner live clock */
-.corner-clock {
-position: absolute;
-top: 32px;
-left: 36px;
-font-size: 32px;
-font-weight: 250;
-letter-spacing: -0.8px;
-color: var(--mute);
-font-variant-numeric: tabular-nums;
-font-feature-settings: "tnum";
-line-height: 1;
-transition: color 0.18s ease;
-}
-.corner-clock:hover {
-color: var(--ink-strong);
-}
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:10;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    background:rgba(12,12,14,.72);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{display:flex;align-items:center;gap:24px;height:58px}
+  .logo{font-size:19px;font-weight:650;letter-spacing:-.4px;color:var(--ink-strong)}
+  .logo span{color:var(--accent)}
+  .nav-links{display:flex;gap:22px;margin-left:auto;font-size:13.5px;color:var(--mute)}
+  .nav-links a{transition:color .15s}
+  .nav-links a:hover{color:var(--ink-strong)}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 18px;border-radius:20px;font-size:13.5px;font-weight:550;
+    border:1px solid var(--border);background:var(--raised);color:var(--ink);
+    cursor:pointer;transition:all .15s ease;font-family:inherit;
+  }
+  .btn:hover{background:var(--elevated);border-color:#33333c}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 4px 16px rgba(224,112,58,.3)}
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn svg{width:15px;height:15px}
 
-/* Center brand identity */
-.brand {
-display: flex; flex-direction: column; align-items: center;
-margin-bottom: 32px;
-}
-h1 {
-font-size: 42px; font-weight: 600; letter-spacing: -0.8px;
-color: var(--ink-strong);
-text-shadow: var(--title-shadow);
-}
-h1 span {
-color: var(--accent);
-position: relative;
-}
+  /* ---------- hero ---------- */
+  header{padding:110px 0 84px;text-align:center}
+  .eyebrow{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:1.6px;
+    text-transform:uppercase;color:var(--accent);
+    border:1px solid rgba(224,112,58,.35);border-radius:14px;
+    padding:5px 14px;margin-bottom:26px;
+  }
+  h1{
+    font-size:clamp(52px,8vw,92px);font-weight:650;letter-spacing:-3px;
+    color:var(--ink-strong);line-height:1.02;
+  }
+  h1 span{color:var(--accent)}
+  .sub{
+    margin:24px auto 0;max-width:520px;
+    font-size:17px;line-height:1.65;color:var(--mute);
+  }
+  .cta{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+  .cta .btn{padding:13px 26px;font-size:14.5px}
+  .hint-row{display:flex;gap:8px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+  kbd{
+    font-family:inherit;font-size:11px;color:var(--mute);
+    background:var(--raised);border:1px solid var(--border);
+    border-radius:6px;padding:3px 8px;
+  }
+  .hint-row span{font-size:12px;color:var(--mute2);align-self:center;margin-right:10px}
 
-/* Frosted glass search box */
-.search-form {
-width: min(620px, 86vw);
-display: flex; align-items: center;
-background: var(--glass);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-border: 1px solid var(--glass-border);
-border-radius: 30px;
-padding: 6px 8px 6px 24px;
-box-shadow:
-var(--shadow-sm),
-inset 0 1px 0 var(--glass-inset);
-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.search-form:hover {
-border-color: var(--glass-border-hover);
-box-shadow:
-var(--shadow-md),
-inset 0 1px 0 var(--glass-inset);
-}
-.search-form:focus-within {
-border-color: var(--accent);
-box-shadow:
-0 0 0 3px var(--ring),
-var(--shadow-lg);
-transform: translateY(-1px);
-}
-.search-input {
-flex: 1; border: none; background: transparent; outline: none;
-font-size: 15px; color: var(--ink-strong); font-family: inherit;
-padding: 10px 0;
-}
-.search-input::placeholder { color: var(--mute2); }
+  /* ---------- browser mock ---------- */
+  .mock{
+    margin:64px auto 0;max-width:940px;
+    border:1px solid var(--border);border-radius:14px;overflow:hidden;
+    background:var(--panel);
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03) inset;
+  }
+  .mock-tabbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
+  .mock-tab{display:flex;align-items:center;gap:7px;height:28px;padding:0 12px;border-radius:8px 8px 0 0;font-size:11.5px;color:var(--mute2);max-width:170px}
+  .mock-tab.active{background:var(--panel);color:var(--ink);border-bottom:2px solid var(--accent)}
+  .mock-plus{color:var(--mute);font-size:15px;padding:0 8px}
+  .mock-bar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--panel)}
+  .mock-nav-ic{color:var(--mute);font-size:14px;display:flex;gap:14px}
+  .mock-url{
+    flex:1;display:flex;align-items:center;gap:8px;
+    background:var(--raised);border:1px solid var(--border);border-radius:16px;
+    padding:7px 16px;font-size:12px;color:var(--mute);
+  }
+  .mock-url b{color:var(--ink);font-weight:500}
+  .mock-page{
+    height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    background-image:radial-gradient(circle at 50% 48%,var(--glow) 0%,var(--glow2) 36%,transparent 68%),radial-gradient(var(--dot) 1px,transparent 1px);
+    background-size:100% 100%,28px 28px;
+  }
+  .mock-title{font-size:34px;font-weight:600;letter-spacing:-.8px;color:var(--ink-strong)}
+  .mock-title span{color:var(--accent)}
+  .mock-search{
+    width:min(420px,80%);display:flex;align-items:center;
+    background:rgba(22,22,27,.85);border:1px solid rgba(255,255,255,.08);
+    border-radius:24px;padding:9px 9px 9px 20px;font-size:12px;color:var(--mute2);
+  }
+  .mock-go{margin-left:auto;width:30px;height:30px;border-radius:15px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
 
-/* Search button: flat & stable, no scale */
-.search-btn {
-width: 42px; height: 42px;
-border: none; border-radius: 21px;
-background: var(--accent); color: #ffffff;
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; outline: none;
-box-shadow: 0 4px 12px var(--accent-shadow);
-transition: background-color 0.15s ease, box-shadow 0.15s ease;
-flex-shrink: 0; margin-left: 10px;
-}
-.search-btn:hover {
-background: var(--accent-hover);
-box-shadow: 0 4px 14px var(--accent-shadow-lg);
-}
-.search-btn:active {
-background: var(--accent-active);
-}
-.search-btn svg {
-width: 18px; height: 18px;
-display: block;
-}
+  /* ---------- features ---------- */
+  section{padding:84px 0}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:12px}
+  h2{font-size:34px;font-weight:620;letter-spacing:-1px;color:var(--ink-strong);margin-bottom:14px}
+  .section-sub{max-width:480px;font-size:15px;line-height:1.65;color:var(--mute);margin-bottom:44px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:26px 24px;transition:border-color .15s,transform .15s;
+  }
+  .card:hover{border-color:#36363f;transform:translateY(-2px)}
+  .card .ic{
+    width:38px;height:38px;border-radius:10px;
+    background:rgba(224,112,58,.12);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;font-size:19px;
+  }
+  .card .ic.v{background:rgba(167,139,250,.12);color:var(--purple)}
+  .card h3{font-size:15.5px;font-weight:580;color:var(--ink-strong);margin-bottom:8px}
+  .card p{font-size:13px;line-height:1.6;color:var(--mute)}
 
-/* Keyboard hint */
-.hint {
-margin-top: 26px; font-size: 12.5px; color: var(--mute2);
-letter-spacing: 0.3px;
-}
-.hint kbd {
-font-family: inherit; font-size: 11px;
-background: var(--kbd-bg); color: var(--mute);
-padding: 2px 6px; border-radius: 4px;
-border: 1px solid var(--kbd-border);
-}
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--border);padding:36px 0;color:var(--mute2);font-size:12.5px}
+  .foot{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .foot .spacer{margin-left:auto}
 </style>
 </head>
 <body>
-<div class="corner-clock" id="clockTime">--:--</div>
 
-<div class="brand">
-<h1><span>P</span>yxis</h1>
-</div>
+<nav><div class="wrap nav-inner">
+  <a class="logo" href="#"><span>P</span>yxis</a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="https://github.com/kevin-dev-tw/Pyxis-browser">GitHub</a>
+  </div>
+  <a class="btn primary" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15 7.5 10.5M4 21h16"/></svg>
+    Download
+  </a>
+</div></nav>
 
-<form class="search-form" id="searchForm" action="https://www.google.com/search" method="get">
-<input type="text" class="search-input" id="searchInput" name="q" autofocus
-placeholder="Search Google or type a URL" autocomplete="off" spellcheck="false">
-<button type="submit" class="search-btn" id="searchBtn" title="Search" aria-label="Search">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-<circle cx="11" cy="11" r="7.5"></circle>
-<line x1="21" y1="21" x2="16.5" y2="16.5"></line>
-</svg>
-</button>
-</form>
+<header><div class="wrap">
+  <div class="eyebrow">Chromium &middot; Windows &middot; Yours</div>
+  <h1><span>P</span>yxis</h1>
+  <p class="sub">A personal Chromium workstation. Adaptive tabs, split view,
+  built-in shields, and a calm dark canvas — no noise, no clutter.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">Download for Windows</a>
+    <a class="btn" href="https://github.com/kevin-dev-tw/Pyxis-browser">View on GitHub</a>
+  </div>
+  <div class="hint-row">
+    <span><kbd>Ctrl+T</kbd> new tab</span>
+    <span><kbd>Ctrl+\</kbd> split view</span>
+    <span><kbd>Ctrl+L</kbd> address bar</span>
+    <span><kbd>Ctrl+H</kbd> history</span>
+  </div>
 
-<p class="hint">
-<kbd>Ctrl+T</kbd> new tab &middot;
-<kbd>Ctrl+\</kbd> split view &middot;
-<kbd>Ctrl+L</kbd> address bar &middot;
-<kbd>Ctrl+H</kbd> history
-</p>
+  <div class="mock">
+    <div class="mock-tabbar">
+      <div class="mock-tab active">&#9673; New Tab</div>
+      <div class="mock-tab">&#9673; Settings</div>
+      <div class="mock-plus">+</div>
+    </div>
+    <div class="mock-bar">
+      <div class="mock-nav-ic">&#8592; &#8594; &#8635; &#8962;</div>
+      <div class="mock-url">&#128274; <b>pyxis://newtab</b></div>
+      <div class="mock-nav-ic">&#9734; &#8942;</div>
+    </div>
+    <div class="mock-page">
+      <div class="mock-title"><span>P</span>yxis</div>
+      <div class="mock-search">Search Google or type a URL <span class="mock-go">&#8594;</span></div>
+    </div>
+  </div>
+</div></header>
 
-<script>
-function updateClock() {
-var now = new Date();
-var h = String(now.getHours()).padStart(2, '0');
-var m = String(now.getMinutes()).padStart(2, '0');
-document.getElementById('clockTime').textContent = h + ':' + m;
-}
-updateClock();
-setInterval(updateClock, 1000);
+<section id="features"><div class="wrap">
+  <div class="section-label">Features</div>
+  <h2>Built like a tool, not a feed.</h2>
+  <p class="section-sub">Everything a browser needs, nothing it doesn't.
+  Every surface stays quiet so the web stays loud.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="ic">&#8801;</div>
+      <h3>Adaptive tabs</h3>
+      <p>Chrome-style compression: tabs shrink smoothly from 220px down to
+      icon-only as you open more. Overflow scrolls horizontally.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9707;</div>
+      <h3>Split view</h3>
+      <p>Two pages side by side in one tab with an active-pane focus ring.
+      Perfect for docs on the left, work on the right.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9884;</div>
+      <h3>Shields built in</h3>
+      <p>EasyList and EasyPrivacy filtering at the network layer — ads and
+      trackers never reach the page. Toggle anytime.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9681;</div>
+      <h3>Dark &amp; light</h3>
+      <p>A real theme system: chrome, internal pages and web
+      <code>prefers-color-scheme</code> all switch together.</p>
+    </div>
+    <div class="card">
+      <div class="ic v">&#9673;</div>
+      <h3>Incognito tabs</h3>
+      <p>Isolated session profile marked in violet. Nothing persists —
+      history, cookies and cache vanish on close.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#8984;</div>
+      <h3>Keyboard-first</h3>
+      <p><kbd>Ctrl+\</kbd> split, <kbd>Ctrl+H</kbd> history, <kbd>Ctrl+J</kbd>
+      downloads, <kbd>Ctrl+Shift+B</kbd> bookmarks bar. Keep typing.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#8599;</div>
+      <h3>Internal pages</h3>
+      <p><code>pyxis://newtab</code>, <code>pyxis://history</code> and
+      <code>pyxis://settings</code> render offline, instantly.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#9729;</div>
+      <h3>Remote start page</h3>
+      <p>The new-tab page can sync from a deployed URL — update the site,
+      every install picks it up on next launch.</p>
+    </div>
+    <div class="card">
+      <div class="ic">&#8595;</div>
+      <h3>Chromium inside</h3>
+      <p>WebView2 runtime: the same engine as Edge, packaged in ~1 MB of
+      your own code. No Electron shell, no bloat.</p>
+    </div>
+  </div>
+</div></section>
 
-document.getElementById('searchForm').addEventListener('submit', function(e) {
-var q = document.getElementById('searchInput').value.trim();
-if (!q) { e.preventDefault(); return; }
-if (/^https?:\/\//i.test(q)) {
-e.preventDefault();
-location.href = q;
-} else if (!q.includes(' ') && q.includes('.') && !q.startsWith('.')) {
-e.preventDefault();
-location.href = 'https://' + q;
-}
-});
-</script>
+<footer><div class="wrap foot">
+  <a class="logo" href="#"><span>P</span>yxis</a>
+  <span>Minimalist Chromium workstation.</span>
+  <span class="spacer"></span>
+  <a href="https://github.com/kevin-dev-tw/Pyxis-browser">GitHub</a>
+  <span>&middot;</span>
+  <span>Built with WebView2 + .NET 8</span>
+</div></footer>
+
 </body>
 </html>
