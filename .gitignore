@@ -1,0 +1,21 @@
+# Vercel
+.vercel
+
+# Dependencies (if any tooling is added later)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
