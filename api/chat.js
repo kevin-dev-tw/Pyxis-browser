@@ -32,6 +32,7 @@ module.exports = async function handler(req, res) {
         top_p: 1,
         stream: true,
         reasoning_effort: 'medium',
+        tools: [{ type: 'browser_search' }],
         messages
       })
     });
