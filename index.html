@@ -3,216 +3,416 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pyxis</title>
+<title>Pyxis — a local-first browser for Windows</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="web-app-manifest-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="web-app-manifest-512x512.png">
-<meta name="description" content="Pyxis is a minimalist Chromium browser for Windows. Adaptive tabs, split view, ad blocking, dark and light themes, and keyboard-first navigation.">
+<meta name="description" content="Pyxis is a local-first Chromium browser for Windows — adaptive tabs, split view, built-in ad blocking, Zen mode, and zero telemetry.">
 <style>
   :root{
-    --bg:#0c0c0e; --panel:#131316; --raised:#1b1b1f; --elevated:#232329;
-    --ink:#e4e4e7; --ink-strong:#f4f4f5; --mute:#9c9ca6; --mute2:#7c7c86;
-    --border:#26262c; --card:#16161b;
-    --accent:#e0703a; --accent-hover:#ea7e48; --accent-active:#c96027;
-    --purple:#a78bfa;
-    --glow:rgba(224,112,58,.08); --glow2:rgba(224,112,58,.02);
-    --dot:rgba(255,255,255,.05);
+    --bg:#0b0d10; --panel:#0f1216; --raised:#14181d; --elevated:#1a1f26;
+    --ink:#e4e7ea; --ink-strong:#f2f4f6; --mute:#8b95a0; --mute2:#5e6875;
+    --line:#232932; --line-strong:#2e3743;
+    --accent:#e0703a; --accent-dim:rgba(224,112,58,.14);
+    --mono:"JetBrains Mono","Cascadia Code",ui-monospace,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
     background:var(--bg);color:var(--ink);
     font-family:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
-    background-image:
-      radial-gradient(ellipse 90% 55% at 50% -10%, var(--glow) 0%, var(--glow2) 40%, transparent 70%),
-      radial-gradient(var(--dot) 1px, transparent 1px);
-    background-size:100% 100%,28px 28px;
-    min-height:100vh;
+    min-height:100vh;overflow-x:hidden;
   }
-  ::selection{background:rgba(224,112,58,.4);color:#fff}
+  ::selection{background:rgba(224,112,58,.45);color:#fff}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  .wrap{padding:0 40px}
+  .label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--mute2);
+  }
 
-  /* ---------- nav ---------- */
+  /* ---------- nav: floating pill ---------- */
   nav{
-    position:sticky;top:0;z-index:10;
-    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-    background:rgba(12,12,14,.72);
-    border-bottom:1px solid var(--border);
+    position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:20;
+    display:flex;align-items:center;gap:2px;
+    padding:6px;border:1px solid var(--line-strong);border-radius:999px;
+    background:var(--raised);
   }
-  .nav-inner{display:flex;align-items:center;gap:24px;height:58px}
-  .logo{font-size:19px;font-weight:650;letter-spacing:-.4px;color:var(--ink-strong)}
-  .logo span{color:var(--accent)}
-  .nav-links{display:flex;gap:22px;margin-left:auto;font-size:13.5px;color:var(--mute)}
-  .nav-links a{transition:color .15s}
-  .nav-links a:hover{color:var(--ink-strong)}
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:9px 18px;border-radius:20px;font-size:13.5px;font-weight:550;
-    border:1px solid var(--border);background:var(--raised);color:var(--ink);
-    cursor:pointer;transition:all .15s ease;font-family:inherit;
+  nav .logo{
+    display:flex;align-items:center;gap:8px;padding:5px 14px 5px 8px;
+    font-size:14px;font-weight:600;color:var(--ink-strong);
+    border-right:1px solid var(--line);margin-right:4px;
   }
-  .btn:hover{background:var(--elevated);border-color:#33333c}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
-    box-shadow:0 4px 16px rgba(224,112,58,.3)}
-  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-  .btn svg{width:15px;height:15px}
+  nav .logo img{width:20px;height:20px;display:block}
+  nav .logo b{color:var(--accent);font-weight:600}
+  nav a{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute);
+    padding:8px 16px;border-radius:999px;transition:all .15s;
+  }
+  nav a:hover{color:var(--ink-strong);background:var(--elevated)}
+  nav a.logo{
+    font-family:inherit;font-size:14px;font-weight:600;letter-spacing:-.3px;
+    text-transform:none;color:var(--ink-strong);padding:5px 14px 5px 8px;
+    border-right:1px solid var(--line);margin-right:4px;border-radius:0;
+  }
+  nav a.logo:hover{background:none;color:var(--ink-strong)}
 
   /* ---------- hero ---------- */
-  header{padding:110px 0 84px;text-align:center}
-  h1{
-    font-size:clamp(52px,8vw,92px);font-weight:650;letter-spacing:-3px;
-    color:var(--ink-strong);line-height:1.02;
+  .hero{
+    position:relative;min-height:100vh;display:flex;align-items:center;
+    background-image:
+      linear-gradient(rgba(35,41,50,.55) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(35,41,50,.55) 1px,transparent 1px);
+    background-size:28px 28px;
   }
-  h1 span{color:var(--accent)}
-  .cta{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
-  .cta .btn{padding:13px 26px;font-size:14.5px}
-  .hint-row{display:flex;gap:8px;justify-content:center;margin-top:34px;flex-wrap:wrap}
-  kbd{
-    font-family:inherit;font-size:11px;color:var(--mute);
-    background:var(--raised);border:1px solid var(--border);
-    border-radius:6px;padding:3px 8px;
+  .hero .wrap{position:relative;z-index:2;width:100%}
+  .hero-split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  .hero-inner{max-width:620px}
+  .hero-shot{border:1px solid var(--line-strong);background:var(--panel);padding:10px}
+  .hero-shot img{display:block;width:100%;height:auto}
+  .hero-shot figcaption{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--mute2);padding:10px 2px 2px;
   }
-  .hint-row span{font-size:12px;color:var(--mute2);align-self:center;margin-right:10px}
+  .hero .label{color:var(--accent);margin-bottom:22px}
+  .hero h1{
+    font-size:clamp(56px,9vw,110px);font-weight:600;letter-spacing:-3.5px;
+    line-height:.94;color:var(--ink-strong);margin-bottom:26px;
+  }
+  .hero h1 i{font-style:normal;color:var(--accent)}
+  .hero p{
+    font-size:16px;line-height:1.75;color:var(--mute);max-width:460px;margin-bottom:36px;
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:12px;
+    background:var(--accent);color:#fff;border:1px solid var(--accent);
+    padding:13px 22px;font-size:13px;font-weight:600;letter-spacing:.02em;
+    transition:transform .12s,background .12s;
+  }
+  .cta:hover{background:var(--accent-dim);color:var(--accent)}
+  .cta:active{transform:translateY(1px)}
+  .cta .mono{font-family:var(--mono);font-size:10px;opacity:.75}
+  .hero-meta{
+    margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute2);
+  }
 
-  /* ---------- browser mock ---------- */
-  .mock{
-    margin:64px auto 0;max-width:940px;
-    border:1px solid var(--border);border-radius:14px;overflow:hidden;
-    background:var(--panel);
-    box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03) inset;
-  }
+  /* ---------- preview ---------- */
+  .shot{max-width:960px;margin:0 auto}
+  .shot img{opacity:.96}
+  .shot img{display:block;width:100%;height:auto}
 
-  /* ---------- features ---------- */
-  section{padding:84px 0}
-  .section-label{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:12px}
-  h2{font-size:34px;font-weight:620;letter-spacing:-1px;color:var(--ink-strong);margin-bottom:14px}
-  .section-sub{max-width:480px;font-size:15px;line-height:1.65;color:var(--mute);margin-bottom:44px}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  @media(max-width:860px){.grid{grid-template-columns:1fr 1fr}}
-  @media(max-width:560px){.grid{grid-template-columns:1fr}}
-  .card{
-    background:var(--card);border:1px solid var(--border);border-radius:14px;
-    padding:26px 24px;transition:border-color .15s,transform .15s;
+  /* ---------- closing cta ---------- */
+  .closing{border-top:1px solid var(--line);text-align:center}
+  .closing .label{margin-bottom:18px;color:var(--accent)}
+
+  /* ---------- feature grid ---------- */
+  .section{padding:90px 0}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:0}
+  .section-head h2{font-size:26px;font-weight:600;color:var(--ink-strong);letter-spacing:-.5px}
+  /* ---------- features: zigzag ---------- */
+  .zig{border-top:1px solid var(--line)}
+  .zig-row{display:flex;gap:44px;align-items:flex-start;
+    padding:36px 4px;border-bottom:1px solid var(--line)}
+  .zig-row.rev{flex-direction:row-reverse;text-align:right}
+  .zig-num{
+    font-family:var(--mono);font-size:64px;line-height:.9;color:var(--accent);
+    min-width:92px;letter-spacing:-2px;flex-shrink:0;
   }
-  .card:hover{border-color:#36363f;transform:translateY(-2px)}
-  .card .ic{
-    width:38px;height:38px;border-radius:10px;
-    background:rgba(224,112,58,.12);color:var(--accent);
-    display:flex;align-items:center;justify-content:center;
-    margin-bottom:18px;font-size:19px;
+  .zig-body h3{font-size:18px;font-weight:600;color:var(--ink-strong);margin-bottom:8px}
+  .zig-body p{font-size:13px;line-height:1.7;color:var(--mute);max-width:520px}
+  .zig-row.rev .zig-body p{margin-left:auto}
+  .zig-body .keys{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    color:var(--mute2);margin-top:10px;display:block}
+  .also{
+    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:baseline;
+    padding:24px 4px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;color:var(--mute);
   }
-  .card .ic.v{background:rgba(167,139,250,.12);color:var(--purple)}
-  .card h3{font-size:15.5px;font-weight:580;color:var(--ink-strong);margin-bottom:8px}
-  .card p{font-size:13px;line-height:1.6;color:var(--mute)}
+  .also .label{color:var(--accent)}
+
+  /* ---------- statement ---------- */
+  .statement{
+    font-size:clamp(44px,7vw,88px);font-weight:600;letter-spacing:-3px;
+    line-height:1.02;color:var(--ink-strong);padding:80px 0 20px;
+  }
+  .statement i{font-style:normal;color:var(--accent)}
+
+  /* ---------- faq ---------- */
+  details{border-top:1px solid var(--line);overflow:hidden}
+  details:last-child{border-bottom:1px solid var(--line)}
+  summary{
+    list-style:none;cursor:pointer;padding:20px 4px;display:flex;
+    justify-content:space-between;align-items:center;gap:16px;
+    font-size:14.5px;font-weight:500;color:var(--ink-strong);transition:color .15s;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary:hover{color:var(--accent)}
+  summary::after{content:"+";font-family:var(--mono);font-size:14px;color:var(--mute2);flex-shrink:0}
+  details[open] summary::after{content:"−";color:var(--accent)}
+  details p{padding:0 4px 22px;font-size:13px;line-height:1.75;color:var(--mute);max-width:720px}
+  details code{font-family:var(--mono);font-size:11.5px;color:var(--accent);
+    background:var(--raised);padding:1px 6px}
+
+  /* ---------- security ---------- */
+  .sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line)}
+  .sec-col{padding:28px 30px 34px}
+  .sec-col+.sec-col{border-left:1px solid var(--line)}
+  .sec-col h3{font-size:15px;font-weight:600;color:var(--ink-strong);margin-bottom:18px}
+  .sec-col h3 em{font-style:normal;color:var(--accent)}
+  .sec-item{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line);
+    font-size:12.5px;line-height:1.6;color:var(--mute)}
+  .sec-item b{color:var(--ink-strong);font-weight:600}
+  .sec-item .glyph{font-family:var(--mono);color:var(--accent);flex-shrink:0}
+  .sec-item.warn .glyph{color:var(--mute2)}
+  @media(max-width:760px){.sec-grid{grid-template-columns:1fr}
+    .sec-col+.sec-col{border-left:none;border-top:1px solid var(--line)}}
 
   /* ---------- footer ---------- */
-  footer{border-top:1px solid var(--border);padding:36px 0;color:var(--mute2);font-size:12.5px}
-  .foot{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-  .foot .spacer{margin-left:auto}
+  footer{border-top:1px solid var(--line);padding:40px 0;margin-top:60px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center}
+  footer a{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute)}
+  footer a:hover{color:var(--accent)}
+
+  @media(max-width:860px){
+    .hero-split{grid-template-columns:1fr;gap:40px}
+    .zig-num{font-size:44px;min-width:64px}
+    .zig-row{gap:24px}
+    .hero h1{font-size:clamp(44px,10vw,72px)}
+  }
+  @media(max-width:760px){
+    .section{padding:64px 0}
+    .section-head h2{font-size:22px}
+    .sec-col{padding:22px 22px 28px}
+    .cta{padding:14px 24px}
+    .hero .label{letter-spacing:.16em}
+    .statement{padding:56px 0 12px}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 20px}
+    .hero h1{font-size:clamp(38px,12vw,60px);letter-spacing:-1.6px;line-height:1.02}
+    .hero p{font-size:14px}
+    .hero-meta{font-size:9px}
+    .cta{font-size:12px}
+    .zig-row{flex-direction:column;gap:12px;padding:26px 0}
+    .zig-row.rev{flex-direction:column;text-align:left}
+    .zig-body p{max-width:none}
+    details summary{padding:16px 2px;font-size:13.5px}
+    details p{font-size:12.5px;padding-bottom:18px}
+  }
+  @media(max-width:420px){
+    nav .logo span{display:none}
+    nav .logo{border-right:none;margin-right:0;padding-right:6px}
+    nav a{padding:8px 13px}
+  }
 </style>
 </head>
 <body>
 
-<nav><div class="wrap nav-inner">
-  <a class="logo" href="#"><span>P</span>yxis</a>
-  <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="https://github.com/kevin-dev-tw/Pyxis-browser">GitHub</a>
+<nav>
+  <a class="logo" href="#top"><img src="favicon-96x96.png" alt=""><span><b>P</b>yxis</span></a>
+  <a href="#features">Features</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="wrap hero-split">
+    <div class="hero-inner">
+      <div class="label">PYXIS // LOCAL-FIRST BROWSER</div>
+      <h1>Browse without being <i>watched</i>.</h1>
+      <p>
+        A Chromium browser for Windows — no account, no sync, no telemetry.
+        Your data never leaves the disk.
+      </p>
+      <a class="cta" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">
+        Download for Windows <span class="mono">.exe</span>
+      </a>
+      <div class="hero-meta">v1.0 · win-x64 · .NET 8 + WebView2 · free</div>
+    </div>
+    <figure class="hero-shot">
+      <img src="screenshot.png" alt="Pyxis browser showing the start page">
+      <figcaption>Pyxis on Windows — live UI</figcaption>
+    </figure>
   </div>
-  <a class="btn primary" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15 7.5 10.5M4 21h16"/></svg>
-    Download
-  </a>
-</div></nav>
+</section>
 
-<header><div class="wrap">
-  <h1><span>P</span>yxis</h1>
-  <div class="cta">
-    <a class="btn primary" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">Download for Windows</a>
-    <a class="btn" href="https://github.com/kevin-dev-tw/Pyxis-browser">View on GitHub</a>
+<!-- ================= FEATURES ================= -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What's inside</h2>
+      <span class="label">FEATURE SET — REAL, SHIPPED</span>
+    </div>
+    <div class="zig">
+      <div class="zig-row">
+        <div class="zig-num">01</div>
+        <div class="zig-body">
+          <h3>Adaptive tab strip</h3>
+          <p>Tabs resize fluidly as you open and close them — width-animated like Chrome's, with a progress-ring sweep while loading.</p>
+          <span class="keys">CTRL+T · CTRL+W</span>
+        </div>
+      </div>
+      <div class="zig-row rev">
+        <div class="zig-num">02</div>
+        <div class="zig-body">
+          <h3>Split view</h3>
+          <p>Two pages side by side in a single tab — compare docs, read while you browse.</p>
+          <span class="keys">CTRL+\</span>
+        </div>
+      </div>
+      <div class="zig-row">
+        <div class="zig-num">03</div>
+        <div class="zig-body">
+          <h3>Built-in ad blocking</h3>
+          <p>EasyList + EasyPrivacy filters cut trackers at the network layer, plus cosmetic hiding — no extension needed.</p>
+          <span class="keys">EASYLIST ENGINE</span>
+        </div>
+      </div>
+      <div class="zig-row rev">
+        <div class="zig-num">04</div>
+        <div class="zig-body">
+          <h3>Bookmarks &amp; folders</h3>
+          <p>Chrome-style bookmark bar — drag a bookmark onto another to group it into a folder, rename inline.</p>
+          <span class="keys">DRAG TO GROUP</span>
+        </div>
+      </div>
+      <div class="zig-row">
+        <div class="zig-num">05</div>
+        <div class="zig-body">
+          <h3>Zen mode</h3>
+          <p>Hide the entire chrome — tabs, toolbar, bookmarks. Just the page and a quiet exit hint.</p>
+          <span class="keys">CTRL+SHIFT+Z</span>
+        </div>
+      </div>
+      <div class="zig-row rev">
+        <div class="zig-num">06</div>
+        <div class="zig-body">
+          <h3>Privacy tools</h3>
+          <p>Copy clean links stripped of utm_/fbclid tracking, plus a confirmed one-key site-data wipe.</p>
+          <span class="keys">MENU → PRIVACY</span>
+        </div>
+      </div>
+      <div class="also">
+        <span class="label">ALSO SHIPPED —</span>
+        <span>incognito tabs · screenshot → png · dark/light themes · bilingual en/zh-TW · custom start page · download toasts · F12 devtools · ctrl+p print</span>
+      </div>
+    </div>
+
+    <div class="statement">
+      0 telemetry.<br>0 account.<br><i>100% yours.</i>
+    </div>
   </div>
-  <div class="hint-row">
-    <span><kbd>Ctrl+T</kbd> new tab</span>
-    <span><kbd>Ctrl+\</kbd> split view</span>
-    <span><kbd>Ctrl+L</kbd> address bar</span>
-    <span><kbd>Ctrl+H</kbd> history</span>
+</section>
+
+<!-- ================= SECURITY ================= -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Security &amp; privacy</h2>
+      <span class="label">WHAT WE DO — AND WHAT WE DON'T HIDE</span>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-col">
+        <h3><em>IN</em> THE BROWSER</h3>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>Zero telemetry.</b> Nothing in the code phones home — there is no analytics, reporting or vendor cloud anywhere.</div></div>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>Local-first storage.</b> Bookmarks, history, shortcuts, chats and settings are plain JSON in <code>%LocalAppData%\Pyxis</code> — readable and deletable by you.</div></div>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>Tracker blocking.</b> EasyList + EasyPrivacy filters cut third-party trackers at the network layer, plus cosmetic hiding.</div></div>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>Clean links.</b> Copy strips <code>utm_*</code>, <code>fbclid</code>, <code>gclid</code> and other tracking params before sharing.</div></div>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>One-key wipe.</b> Clear site data removes cookies, site storage, HTTP cache, browsing and download history — behind a confirm dialog.</div></div>
+        <div class="sec-item"><span class="glyph">+</span>
+          <div><b>Real incognito.</b> Incognito tabs use a separate in-memory WebView2 profile — nothing is persisted, ever.</div></div>
+      </div>
+      <div class="sec-col">
+        <h3>KNOWN <em>EDGES</em></h3>
+        <div class="sec-item warn"><span class="glyph">−</span>
+          <div><b>Default search is Google.</b> Queries go to Google unless you change engines — the engine sees your searches.</div></div>
+        <div class="sec-item warn"><span class="glyph">−</span>
+          <div><b>SmartScreen.</b> WebView2's safe-browsing check may report URLs to Microsoft; it can be disabled per profile.</div></div>
+        <div class="sec-item warn"><span class="glyph">−</span>
+          <div><b>Start-page weather.</b> The weather card calls wttr.in, exposing your public IP to that service.</div></div>
+        <div class="sec-item warn"><span class="glyph">−</span>
+          <div><b>No anonymity layer.</b> Your ISP sees your traffic — Pyxis doesn't hide you, it doesn't hide from you.</div></div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="mock"><img src="screenshot.png" alt="Pyxis browser ??new tab page" style="display:block;width:100%;height:auto"></div></div></header>
+<!-- ================= FAQ ================= -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Questions</h2>
+      <span class="label">FAQ</span>
+    </div>
+    <details open>
+      <summary>Is Pyxis real Chromium?</summary>
+      <p>Pyxis renders with the same Chromium engine as Microsoft Edge via WebView2 — Blink layout, V8 JavaScript, full HTML5. It's not a fork of Google Chrome, so Chrome UI features and extensions aren't carried over.</p>
+    </details>
+    <details>
+      <summary>Does Pyxis send my data anywhere?</summary>
+      <p>No. There is no account, no sync service, no analytics. Bookmarks, history, shortcuts and settings are JSON files in <code>%LocalAppData%\Pyxis</code> — readable and deletable by you at any time.</p>
+    </details>
+    <details>
+      <summary>Can I install Chrome extensions?</summary>
+      <p>No — WebView2 doesn't support Chrome extensions. Built-in replacements cover the common cases: ad blocking, screenshots, clean-link copying and incognito are already inside.</p>
+    </details>
+    <details>
+      <summary>Is it Windows-only?</summary>
+      <p>Yes. The shell is WPF (.NET 8) and WebView2 is a Windows technology. macOS or Linux support would require a different stack entirely.</p>
+    </details>
+    <details>
+      <summary>Is it free?</summary>
+      <p>Yes — it's a personal project, source available on GitHub. Download the release, run the exe, done.</p>
+    </details>
+  </div>
+</section>
 
-<section id="features"><div class="wrap">
-  <div class="section-label">Features</div>
-  <h2>Built like a tool, not a feed.</h2>
-  <p class="section-sub">Everything a browser needs, nothing it doesn't.
-  Every surface stays quiet so the web stays loud.</p>
-    <div class="grid">
-    <div class="card">
-      <div class="ic">&#8801;</div>
-      <h3>Adaptive tabs</h3>
-      <p>Tab width recalculates live — 220px down to 46px icon-only. Below
-      75px the close button hides, below 55px the title does. Overflow scrolls.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9707;</div>
-      <h3>Split view</h3>
-      <p><kbd>Ctrl+\</kbd> opens a second pane beside the first — independent
-      navigation, ember ring marks the focused side.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9884;</div>
-      <h3>Ad &amp; tracker blocking</h3>
-      <p>EasyList + EasyPrivacy rules fetched at startup and applied in the
-      network layer. Badge in the menu shows it working.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9681;</div>
-      <h3>Dark &amp; light themes</h3>
-      <p>One switch in <code>pyxis://settings</code> re-themes the shell,
-      internal pages and sites via <code>prefers-color-scheme</code>.</p>
-    </div>
-    <div class="card">
-      <div class="ic v">&#9673;</div>
-      <h3>Incognito tabs</h3>
-      <p><kbd>Ctrl+Shift+N</kbd> — violet-tinted tabs on an isolated profile.
-      History, cookies and cache are dropped on close.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9734;</div>
-      <h3>Bookmarks bar</h3>
-      <p><kbd>Ctrl+Shift+B</kbd> toggles the strip; star button saves pages,
-      persisted to local JSON. Uniform ember bookmark marks.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#9719;</div>
-      <h3>History dashboard</h3>
-      <p><kbd>Ctrl+H</kbd> opens <code>pyxis://history</code> — searchable
-      timeline, per-entry delete, clear-all, open-in-split.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#8595;</div>
-      <h3>Downloads panel</h3>
-      <p><kbd>Ctrl+J</kbd> drops a flyout with live progress bars for active
-      downloads and a finished-files list.</p>
-    </div>
-    <div class="card">
-      <div class="ic">&#8984;</div>
-      <h3>Keyboard-first</h3>
-      <p><kbd>Ctrl+T</kbd> <kbd>Ctrl+\</kbd> <kbd>Ctrl+L</kbd> <kbd>Ctrl+H</kbd>
-      <kbd>Ctrl+J</kbd> <kbd>Ctrl+Shift+B</kbd> <kbd>F5</kbd> — full control without the mouse.</p>
-    </div>
-  </div></div></section>
+<!-- ================= CLOSING ================= -->
+<section class="section closing">
+  <div class="wrap">
+    <div class="label">READY?</div>
+    <a class="cta" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases">Download for Windows</a>
+  </div>
+</section>
 
-<footer><div class="wrap foot">
-  <a class="logo" href="#"><span>P</span>yxis</a>
-  <span>Minimalist Chromium workstation.</span>
-  <span class="spacer"></span>
-  <a href="https://github.com/kevin-dev-tw/Pyxis-browser">GitHub</a>
-  <span>&middot;</span>
-  <span>Built with WebView2 + .NET 8</span>
-</div></footer>
+<footer>
+  <div class="wrap" style="justify-content:center">
+    <span class="label">© 2026 PYXIS</span>
+  </div>
+</footer>
 
+<script>
+/* FAQ accordion — height-animated expand/collapse on <details>. */
+document.querySelectorAll('details').forEach(function(d){
+  var sum=d.querySelector('summary'),body=d.querySelector('p');
+  sum.addEventListener('click',function(e){
+    e.preventDefault();
+    if(d.open){                                   /* collapse */
+      var from=d.offsetHeight,to=sum.offsetHeight;
+      d.animate({height:[from+'px',to+'px']},{duration:200,easing:'ease'});
+      if(body)body.animate({opacity:[1,0]},{duration:160,easing:'ease'});
+      setTimeout(function(){d.open=false;},190);
+    }else{                                        /* expand */
+      d.open=true;
+      var from=sum.offsetHeight,to=d.offsetHeight;
+      d.style.height=from+'px';
+      d.animate({height:[from+'px',to+'px']},{duration:240,easing:'ease'})
+        .onfinish=function(){d.style.height='auto';};
+      if(body)body.animate({opacity:[0,1],transform:['translateY(-4px)','translateY(0)']},
+        {duration:220,easing:'ease'});
+    }
+  });
+});
+
+</script>
 </body>
 </html>
