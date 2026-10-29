@@ -113,6 +113,8 @@
   /* ---------- closing cta ---------- */
   .closing{border-top:1px solid var(--line);text-align:center}
   .closing .label{margin-bottom:18px;color:var(--accent)}
+  .closing-note{font-family:var(--mono);font-size:12px;color:var(--mute);
+    letter-spacing:.06em;margin:0}
 
   /* ---------- feature grid ---------- */
   .section{padding:90px 0}
@@ -236,11 +238,7 @@
         A Chromium browser for Windows — no account, no sync, no telemetry.
         Your data never leaves the disk.
       </p>
-      <a class="cta" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases/download/Windows/PyxisSetup.exe">
-        Download for Windows <span class="mono">.exe</span>
-      </a>
       <div class="hero-meta">v1.0 · win-x64 · .NET 8 + WebView2 · free</div>
-      <div class="cta-note">unsigned build — if Windows blocks it: right-click → properties → unblock</div>
     </div>
     <figure class="hero-shot">
       <img src="screenshot.png" alt="Pyxis browser showing the start page">
@@ -389,7 +387,7 @@
 <section class="section closing">
   <div class="wrap">
     <div class="label">READY?</div>
-    <a class="cta" href="https://github.com/kevin-dev-tw/Pyxis-browser/releases/download/Windows/PyxisSetup.exe">Download for Windows</a>
+    <p class="closing-note">Builds distributed via direct link.</p>
   </div>
 </section>
 
