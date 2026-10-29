@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/download",
+      "destination": "https://github.com/kevin-dev-tw/Pyxis-browser/releases/download/Windows/PyxisSetup.exe"
+    }
+  ]
+}
