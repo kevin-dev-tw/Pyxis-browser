@@ -31,9 +31,13 @@
   .strip .wrap{display:flex;align-items:center;height:52px}
   .strip .brand{font-family:var(--mono);font-size:13px;letter-spacing:.22em;color:var(--ink);text-decoration:none}
   .strip .brand b{color:var(--amber);font-weight:700}
-  .strip nav{margin-left:auto;display:flex;gap:2px}
+  .strip .brand{flex-shrink:0}
+  .strip nav{margin-left:auto;display:flex;gap:2px;overflow-x:auto;
+    scrollbar-width:none;-ms-overflow-style:none;flex-shrink:1}
+  .strip nav::-webkit-scrollbar{display:none}
   .strip nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-dim);text-decoration:none;padding:6px 12px;border-radius:4px;transition:.15s}
+    color:var(--ink-dim);text-decoration:none;padding:6px 12px;border-radius:4px;transition:.15s;
+    white-space:nowrap}
   .strip nav a:hover{color:var(--ink);background:var(--panel2)}
 
   /* ---------- the board ---------- */
@@ -123,7 +127,8 @@
   @media(max-width:640px){
     .hero{padding:44px 0 36px}
     .brow .st{min-width:84px;font-size:10px}
-    .strip nav a{padding:6px 8px}
+    .strip .brand{font-size:12px;letter-spacing:.14em}
+    .strip nav a{padding:6px 9px;font-size:10px;letter-spacing:.08em}
   }
 </style>
 </head>
