@@ -3,425 +3,286 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pyxis — a local-first browser for Windows</title>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="description" content="Pyxis is a local-first Chromium browser for Windows — adaptive tabs, split view, built-in ad blocking, Zen mode, and zero telemetry.">
 <meta name="google-site-verification" content="ikA4eMUhLTjnxBSzCa1RpgmEg5SL_scysFac4hD4b-k" />
+<title>Pyxis — a local-first browser for Windows</title>
 <style>
+  @font-face{font-family:'JBM';src:local('JetBrains Mono');}
   :root{
-    --bg:#0b0d10; --panel:#0f1216; --raised:#14181d; --elevated:#1a1f26;
-    --ink:#e4e7ea; --ink-strong:#f2f4f6; --mute:#8b95a0; --mute2:#5e6875;
-    --line:#232932; --line-strong:#2e3743;
-    --accent:#e0703a; --accent-dim:rgba(224,112,58,.14);
+    --board:#101013; --panel:#17181b; --panel2:#1d1f23; --line:#2a2d33; --line2:#34373d;
+    --ink:#e8eaed; --ink-dim:#9aa0a6; --ink-faint:#5f6368;
+    --amber:#e0703a; --amber-dim:rgba(224,112,58,.14); --amber-glow:rgba(224,112,58,.35);
     --mono:"JetBrains Mono","Cascadia Code",ui-monospace,Consolas,monospace;
+    --sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);color:var(--ink);
-    font-family:"Segoe UI Variable Text","Segoe UI",-apple-system,system-ui,sans-serif;
-    min-height:100vh;overflow-x:hidden;
-  }
-  ::selection{background:rgba(224,112,58,.45);color:#fff}
-  a{color:inherit;text-decoration:none}
-  .wrap{padding:0 40px}
-  .label{
-    font-family:var(--mono);font-size:10px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--mute2);
-  }
+  body{background:var(--board);color:var(--ink);font-family:var(--sans);
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--amber-dim);color:var(--ink)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;border:2px solid var(--board)}
+  :focus-visible{outline:1.5px solid var(--amber);outline-offset:3px;border-radius:2px}
+  .mono{font-family:var(--mono)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 
-  /* ---------- nav: floating pill ---------- */
-  nav{
-    position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:20;
-    display:flex;align-items:center;gap:2px;
-    padding:6px;border:1px solid var(--line-strong);border-radius:999px;
-    background:var(--raised);
-  }
-  nav .logo{
-    display:flex;align-items:center;gap:8px;padding:5px 14px 5px 8px;
-    font-size:14px;font-weight:600;color:var(--ink-strong);
-    border-right:1px solid var(--line);margin-right:4px;
-  }
-  nav .logo img{width:20px;height:20px;display:block}
-  nav .logo b{color:var(--accent);font-weight:600}
-  nav a{
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--mute);
-    padding:8px 16px;border-radius:999px;transition:all .15s;
-  }
-  nav a:hover{color:var(--ink-strong);background:var(--elevated)}
-  nav a.logo{
-    font-family:inherit;font-size:14px;font-weight:600;letter-spacing:-.3px;
-    text-transform:none;color:var(--ink-strong);padding:5px 14px 5px 8px;
-    border-right:1px solid var(--line);margin-right:4px;border-radius:0;
-  }
-  nav a.logo:hover{background:none;color:var(--ink-strong)}
+  /* ---------- top strip ---------- */
+  .strip{position:sticky;top:0;z-index:50;background:rgba(16,16,19,.92);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .strip .wrap{display:flex;align-items:center;height:52px}
+  .strip .brand{font-family:var(--mono);font-size:13px;letter-spacing:.22em;color:var(--ink);text-decoration:none}
+  .strip .brand b{color:var(--amber);font-weight:700}
+  .strip nav{margin-left:auto;display:flex;gap:2px}
+  .strip nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-dim);text-decoration:none;padding:6px 12px;border-radius:4px;transition:.15s}
+  .strip nav a:hover{color:var(--ink);background:var(--panel2)}
+
+  /* ---------- the board ---------- */
+  .board{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 12px 40px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.03);
+    overflow:hidden}
+  .board-head{display:flex;align-items:center;gap:10px;
+    padding:10px 18px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase}
+  .board-head .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 8px var(--amber-glow);animation:pulse 2.4s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .brow{display:flex;align-items:baseline;gap:16px;
+    padding:11px 18px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);transition:background .15s}
+  .brow:last-child{border-bottom:none}
+  .brow .no{font-size:11px;color:var(--amber);width:64px;flex-shrink:0;letter-spacing:.05em}
+  .brow .dest{flex:1;font-size:13px;letter-spacing:.06em;color:var(--ink)}
+  .brow .st{font-size:11.5px;letter-spacing:.1em;color:var(--ink-dim);text-align:right;min-width:120px}
+  .brow .st.on{color:var(--amber)}
+  .brow.clickable{cursor:pointer}
+  .brow.clickable:hover{background:var(--panel2)}
 
   /* ---------- hero ---------- */
-  .hero{
-    position:relative;min-height:100vh;display:flex;align-items:center;
-    background-image:
-      linear-gradient(rgba(35,41,50,.55) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(35,41,50,.55) 1px,transparent 1px);
-    background-size:28px 28px;
-  }
-  .hero .wrap{position:relative;z-index:2;width:100%}
-  .hero-split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
-  .hero-inner{max-width:620px}
-  .hero-shot{border:1px solid var(--line-strong);background:var(--panel);padding:10px}
-  .hero-shot img{display:block;width:100%;height:auto}
-  .hero-shot figcaption{
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--mute2);padding:10px 2px 2px;
-  }
-  .hero .label{color:var(--accent);margin-bottom:22px}
-  .hero h1{
-    font-size:clamp(56px,9vw,110px);font-weight:600;letter-spacing:-3.5px;
-    line-height:.94;color:var(--ink-strong);margin-bottom:26px;
-  }
-  .hero h1 i{font-style:normal;color:var(--accent)}
-  .hero p{
-    font-size:16px;line-height:1.75;color:var(--mute);max-width:460px;margin-bottom:36px;
-  }
-  .cta{
-    display:inline-flex;align-items:center;gap:12px;
-    background:var(--accent);color:#fff;border:1px solid var(--accent);
-    padding:13px 22px;font-size:13px;font-weight:600;letter-spacing:.02em;
-    transition:transform .12s,background .12s;
-  }
-  .cta:hover{background:var(--accent-dim);color:var(--accent)}
-  .cta:active{transform:translateY(1px)}
-  .cta .mono{font-family:var(--mono);font-size:10px;opacity:.75}
-  .hero-meta{
-    margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--mute2);
-  }
-  .cta-note{
-    margin-top:14px;font-family:var(--mono);font-size:11.5px;
-    color:var(--accent);letter-spacing:.06em;
-    border:1px solid var(--accent-dim);background:var(--accent-dim);
-    padding:8px 14px;display:inline-block;
-  }
+  .hero{padding:72px 0 56px}
+  .hero-title{font-family:var(--mono);font-size:clamp(56px,10vw,110px);font-weight:700;
+    letter-spacing:-.02em;line-height:.95;color:var(--ink)}
+  .hero-title span{color:var(--amber)}
+  .hero-sub{font-family:var(--mono);font-size:clamp(13px,1.6vw,16px);color:var(--ink-dim);
+    letter-spacing:.14em;margin-top:18px}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start}
+  @media(max-width:840px){.hero-grid{grid-template-columns:1fr;gap:32px}}
+  .hero-board{margin-top:34px}
+  .hero-cta{display:flex;gap:14px;align-items:center;margin-top:28px;flex-wrap:wrap}
+  .cta-btn{font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    background:var(--amber);color:#101013;border:none;border-radius:8px;
+    padding:13px 26px;cursor:pointer;text-decoration:none;display:inline-flex;
+    align-items:center;gap:8px;font-weight:700;transition:.15s}
+  .cta-btn:hover{background:#f0874f;transform:translateY(-1px);box-shadow:0 6px 20px -4px var(--amber-glow)}
+  .cta-ghost{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);text-decoration:none;
+    border:1px solid var(--line2);border-radius:8px;padding:12px 18px;transition:.15s}
+  .cta-ghost:hover{color:var(--ink);border-color:var(--ink-faint)}
+  .warn{margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--amber);
+    border:1px solid rgba(224,112,58,.35);background:var(--amber-dim);
+    border-radius:6px;padding:9px 14px;display:inline-block}
+  .shot{margin-top:34px;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    box-shadow:0 16px 48px -16px rgba(0,0,0,.7)}
+  .shot img{width:100%;display:block}
+  .shot figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-faint);
+    padding:8px 14px;background:var(--panel);border-top:1px solid var(--line)}
 
-  /* ---------- preview ---------- */
-  .shot{max-width:960px;margin:0 auto}
-  .shot img{opacity:.96}
-  .shot img{display:block;width:100%;height:auto}
+  /* ---------- sections ---------- */
+  section{padding:56px 0}
+  .sec-title{font-family:var(--mono);font-size:clamp(24px,4vw,38px);font-weight:700;
+    letter-spacing:-.01em;color:var(--ink);margin-bottom:8px}
+  .sec-note{font-size:14px;color:var(--ink-dim);max-width:560px;margin-bottom:28px}
+  .flipboard .brow{font-size:14px}
+  .flipboard .brow .dest{font-size:14px}
 
-  /* ---------- closing cta ---------- */
-  .closing{border-top:1px solid var(--line);text-align:center}
-  .closing .label{margin-bottom:18px;color:var(--accent)}
+  /* big statement board */
+  .statement{padding:44px 0}
+  .statement .big{font-family:var(--mono);font-size:clamp(30px,5.4vw,60px);font-weight:700;
+    line-height:1.15;letter-spacing:-.01em}
+  .statement .big em{font-style:normal;color:var(--amber)}
 
-  /* ---------- feature grid ---------- */
-  .section{padding:90px 0}
-  .section-head{display:flex;align-items:baseline;justify-content:space-between;
-    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:0}
-  .section-head h2{font-size:26px;font-weight:600;color:var(--ink-strong);letter-spacing:-.5px}
-  /* ---------- features: zigzag ---------- */
-  .zig{border-top:1px solid var(--line)}
-  .zig-row{display:flex;gap:44px;align-items:flex-start;
-    padding:36px 4px;border-bottom:1px solid var(--line)}
-  .zig-row.rev{flex-direction:row-reverse;text-align:right}
-  .zig-num{
-    font-family:var(--mono);font-size:64px;line-height:.9;color:var(--accent);
-    min-width:92px;letter-spacing:-2px;flex-shrink:0;
-  }
-  .zig-body h3{font-size:18px;font-weight:600;color:var(--ink-strong);margin-bottom:8px}
-  .zig-body p{font-size:13px;line-height:1.7;color:var(--mute);max-width:520px}
-  .zig-row.rev .zig-body p{margin-left:auto}
-  .zig-body .keys{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    color:var(--mute2);margin-top:10px;display:block}
-  .also{
-    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:baseline;
-    padding:24px 4px;border-bottom:1px solid var(--line);
-    font-family:var(--mono);font-size:11px;color:var(--mute);
-  }
-  .also .label{color:var(--accent)}
+  /* service notes (known edges) */
+  .note-row{display:flex;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:12.5px;align-items:baseline}
+  .note-row:last-child{border-bottom:none}
+  .note-row .tag{width:110px;flex-shrink:0;font-size:10.5px;letter-spacing:.12em;color:var(--ink-faint)}
+  .note-row .txt{color:var(--ink-dim)}
+  .note-row .txt b{color:var(--ink);font-weight:600}
 
-  /* ---------- statement ---------- */
-  .statement{
-    font-size:clamp(44px,7vw,88px);font-weight:600;letter-spacing:-3px;
-    line-height:1.02;color:var(--ink-strong);padding:80px 0 20px;
-  }
-  .statement i{font-style:normal;color:var(--accent)}
-
-  /* ---------- faq ---------- */
-  details{border-top:1px solid var(--line);overflow:hidden}
-  details:last-child{border-bottom:1px solid var(--line)}
-  summary{
-    list-style:none;cursor:pointer;padding:20px 4px;display:flex;
-    justify-content:space-between;align-items:center;gap:16px;
-    font-size:14.5px;font-weight:500;color:var(--ink-strong);transition:color .15s;
-  }
+  /* faq */
+  details{border-bottom:1px solid var(--line);padding:16px 4px}
+  summary{font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;list-style:none;
+    display:flex;justify-content:space-between;align-items:baseline}
   summary::-webkit-details-marker{display:none}
-  summary:hover{color:var(--accent)}
-  summary::after{content:"+";font-family:var(--mono);font-size:14px;color:var(--mute2);flex-shrink:0}
-  details[open] summary::after{content:"−";color:var(--accent)}
-  details p{padding:0 4px 22px;font-size:13px;line-height:1.75;color:var(--mute);max-width:720px}
-  details code{font-family:var(--mono);font-size:11.5px;color:var(--accent);
-    background:var(--raised);padding:1px 6px}
+  summary::after{content:"+";font-family:var(--mono);font-size:15px;color:var(--ink-faint)}
+  details[open] summary::after{content:"–"}
+  details p{padding:12px 0 4px;font-size:13.5px;color:var(--ink-dim);max-width:680px}
 
-  /* ---------- security ---------- */
-  .sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line)}
-  .sec-col{padding:28px 30px 34px}
-  .sec-col+.sec-col{border-left:1px solid var(--line)}
-  .sec-col h3{font-size:15px;font-weight:600;color:var(--ink-strong);margin-bottom:18px}
-  .sec-col h3 em{font-style:normal;color:var(--accent)}
-  .sec-item{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line);
-    font-size:12.5px;line-height:1.6;color:var(--mute)}
-  .sec-item b{color:var(--ink-strong);font-weight:600}
-  .sec-item .glyph{font-family:var(--mono);color:var(--accent);flex-shrink:0}
-  .sec-item.warn .glyph{color:var(--mute2)}
-  @media(max-width:760px){.sec-grid{grid-template-columns:1fr}
-    .sec-col+.sec-col{border-left:none;border-top:1px solid var(--line)}}
+  /* final + footer */
+  .final{text-align:left;padding:64px 0}
+  .final .board{max-width:720px}
+  footer{border-top:1px solid var(--line);padding:22px 0}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  footer span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-faint)}
 
-  /* ---------- footer ---------- */
-  footer{border-top:1px solid var(--line);padding:40px 0;margin-top:60px}
-  footer .wrap{display:flex;justify-content:space-between;align-items:center}
-  footer a{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--mute)}
-  footer a:hover{color:var(--accent)}
-
-  @media(max-width:860px){
-    .hero-split{grid-template-columns:1fr;gap:40px}
-    .zig-num{font-size:44px;min-width:64px}
-    .zig-row{gap:24px}
-    .hero h1{font-size:clamp(44px,10vw,72px)}
-  }
-  @media(max-width:760px){
-    .section{padding:64px 0}
-    .section-head h2{font-size:22px}
-    .sec-col{padding:22px 22px 28px}
-    .cta{padding:14px 24px}
-    .hero .label{letter-spacing:.16em}
-    .statement{padding:56px 0 12px}
-  }
-  @media(max-width:560px){
-    .wrap{padding:0 20px}
-    .hero h1{font-size:clamp(38px,12vw,60px);letter-spacing:-1.6px;line-height:1.02}
-    .hero p{font-size:14px}
-    .hero-meta{font-size:9px}
-    .cta{font-size:12px}
-    .zig-row{flex-direction:column;gap:12px;padding:26px 0}
-    .zig-row.rev{flex-direction:column;text-align:left}
-    .zig-body p{max-width:none}
-    details summary{padding:16px 2px;font-size:13.5px}
-    details p{font-size:12.5px;padding-bottom:18px}
-  }
-  @media(max-width:420px){
-    nav .logo span{display:none}
-    nav .logo{border-right:none;margin-right:0;padding-right:6px}
-    nav a{padding:8px 13px}
+  @media(max-width:640px){
+    .hero{padding:44px 0 36px}
+    .brow .st{min-width:84px;font-size:10px}
+    .strip nav a{padding:6px 8px}
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="logo" href="#top"><img src="favicon-96x96.png" alt=""><span><b>P</b>yxis</span></a>
-  <a href="#features">Features</a>
-  <a href="#faq">FAQ</a>
-  <a href="brand.html">Brand</a>
-</nav>
+<div class="strip">
+  <div class="wrap">
+    <a class="brand" href="#">PYXIS<b>_</b>TERMINAL</a>
+    <nav>
+      <a href="#routes">Routes</a>
+      <a href="#notes">Service notes</a>
+      <a href="#faq">Info</a>
+      <a href="brand.html">Brand</a>
+    </nav>
+  </div>
+</div>
 
 <!-- ================= HERO ================= -->
-<section class="hero" id="top">
-  <div class="wrap hero-split">
-    <div class="hero-inner">
-      <div class="label">PYXIS // LOCAL-FIRST BROWSER</div>
-      <h1>Browse without being <i>watched</i>.</h1>
-      <p>
-        A Chromium browser for Windows — no account, no sync, no telemetry.
-        Your data never leaves the disk.
-      </p>
-      <a class="cta" href="/download">
-        Download for Windows <span class="mono">.exe</span>
-      </a>
-      <div class="hero-meta">v1.0 · win-x64 · .NET 8 + WebView2 · free</div>
-      <div class="cta-note">unsigned build — if Windows blocks it: right-click → properties → unblock</div>
-    </div>
-    <figure class="hero-shot">
-      <img src="screenshot.png" alt="Pyxis browser showing the start page">
-      <figcaption>Pyxis on Windows — live UI</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ================= FEATURES ================= -->
-<section class="section" id="features">
+<section class="hero">
   <div class="wrap">
-    <div class="section-head">
-      <h2>What's inside</h2>
-      <span class="label">FEATURE SET — REAL, SHIPPED</span>
-    </div>
-    <div class="zig">
-      <div class="zig-row">
-        <div class="zig-num">01</div>
-        <div class="zig-body">
-          <h3>Adaptive tab strip</h3>
-          <p>Tabs resize fluidly as you open and close them — width-animated like Chrome's, with a progress-ring sweep while loading.</p>
-          <span class="keys">CTRL+T · CTRL+W</span>
-        </div>
-      </div>
-      <div class="zig-row rev">
-        <div class="zig-num">02</div>
-        <div class="zig-body">
-          <h3>Split view</h3>
-          <p>Two pages side by side in a single tab — compare docs, read while you browse.</p>
-          <span class="keys">CTRL+\</span>
-        </div>
-      </div>
-      <div class="zig-row">
-        <div class="zig-num">03</div>
-        <div class="zig-body">
-          <h3>Built-in ad blocking</h3>
-          <p>EasyList + EasyPrivacy filters cut trackers at the network layer, plus cosmetic hiding — no extension needed.</p>
-          <span class="keys">EASYLIST ENGINE</span>
-        </div>
-      </div>
-      <div class="zig-row rev">
-        <div class="zig-num">04</div>
-        <div class="zig-body">
-          <h3>Bookmarks &amp; folders</h3>
-          <p>Chrome-style bookmark bar — drag a bookmark onto another to group it into a folder, rename inline.</p>
-          <span class="keys">DRAG TO GROUP</span>
-        </div>
-      </div>
-      <div class="zig-row">
-        <div class="zig-num">05</div>
-        <div class="zig-body">
-          <h3>Zen mode</h3>
-          <p>Hide the entire chrome — tabs, toolbar, bookmarks. Just the page and a quiet exit hint.</p>
-          <span class="keys">CTRL+SHIFT+Z</span>
-        </div>
-      </div>
-      <div class="zig-row rev">
-        <div class="zig-num">06</div>
-        <div class="zig-body">
-          <h3>Privacy tools</h3>
-          <p>Copy clean links stripped of utm_/fbclid tracking, plus a confirmed one-key site-data wipe.</p>
-          <span class="keys">MENU → PRIVACY</span>
-        </div>
-      </div>
-      <div class="also">
-        <span class="label">ALSO SHIPPED —</span>
-        <span>incognito tabs · screenshot → png · dark/light themes · bilingual en/zh-TW · custom start page · download toasts · F12 devtools · ctrl+p print</span>
-      </div>
-    </div>
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-title">PYXIS<span>.</span></h1>
+        <p class="hero-sub">A LOCAL-FIRST BROWSER FOR WINDOWS</p>
 
-    <div class="statement">
-      0 telemetry.<br>0 account.<br><i>100% yours.</i>
+        <div class="board hero-board">
+          <div class="board-head"><span class="dot"></span>GATE A · LIVE STATUS</div>
+          <div class="brow"><span class="no">DATA</span><span class="dest flip" data-words="STAYS ON YOUR DISK|NEVER UPLOADED|READABLE JSON">STAYS ON YOUR DISK</span><span class="st on">LOCAL</span></div>
+          <div class="brow"><span class="no">ACCT</span><span class="dest flip" data-words="NONE REQUIRED|NOTHING TO SIGN INTO">NONE REQUIRED</span><span class="st">—</span></div>
+          <div class="brow"><span class="no">TELM</span><span class="dest flip" data-words="ZERO TELEMETRY|NOTHING PHONES HOME">ZERO TELEMETRY</span><span class="st on">OFF</span></div>
+          <div class="brow"><span class="no">SYNC</span><span class="dest flip" data-words="NO CLOUD, BY DESIGN|YOUR FILES, YOUR MACHINE">NO CLOUD, BY DESIGN</span><span class="st">—</span></div>
+        </div>
+
+        <div class="hero-cta">
+          <a class="cta-btn" href="/download">BOARD NOW → .EXE</a>
+          <a class="cta-ghost" href="https://github.com/kevin-dev-tw/Pyxis-browser">SOURCE</a>
+        </div>
+        <div class="warn">unsigned build — if Windows blocks it: right-click → properties → unblock</div>
+      </div>
+
+      <figure class="shot">
+        <img src="screenshot.png" alt="Pyxis browser showing the start page">
+        <figcaption>PYX TERMINAL — LIVE UI SPECIMEN</figcaption>
+      </figure>
     </div>
   </div>
 </section>
 
-<!-- ================= SECURITY ================= -->
-<section class="section">
+<!-- ================= ROUTES ================= -->
+<section id="routes">
   <div class="wrap">
-    <div class="section-head">
-      <h2>Security &amp; privacy</h2>
-      <span class="label">WHAT WE DO — AND WHAT WE DON'T HIDE</span>
+    <h2 class="sec-title">Routes</h2>
+    <p class="sec-note">Every feature runs locally. Nothing on this board leaves the machine.</p>
+    <div class="board flipboard">
+      <div class="board-head"><span class="dot"></span>DEPARTURES · ON TIME</div>
+      <div class="brow"><span class="no">PYX-01</span><span class="dest">ADAPTIVE TAB STRIP — WIDTH-ANIMATED</span><span class="st on">READY</span></div>
+      <div class="brow"><span class="no">PYX-02</span><span class="dest">SPLIT VIEW — TWO PAGES, ONE TAB</span><span class="st on">CTRL+\</span></div>
+      <div class="brow"><span class="no">PYX-03</span><span class="dest">EASYLIST + EASYPRIVACY AD BLOCKING</span><span class="st on">BUILT-IN</span></div>
+      <div class="brow"><span class="no">PYX-04</span><span class="dest">ZEN MODE — JUST THE PAGE</span><span class="st on">CTRL+SHIFT+Z</span></div>
+      <div class="brow"><span class="no">PYX-05</span><span class="dest">BOOKMARKS — FOLDERS, MANAGER, DRAG &amp; DROP</span><span class="st on">LOCAL</span></div>
+      <div class="brow"><span class="no">PYX-06</span><span class="dest">AI SIDEBAR — GROQ, YOUR OWN KEY</span><span class="st">OPTIONAL</span></div>
+      <div class="brow"><span class="no">PYX-07</span><span class="dest">SCREENSHOT → PNG · CLEAN-LINK COPY · SITE WIPE</span><span class="st on">READY</span></div>
+      <div class="brow"><span class="no">PYX-08</span><span class="dest">SESSION RESTORE · PINNED TABS · AUTO-UPDATE</span><span class="st on">READY</span></div>
     </div>
-    <div class="sec-grid">
-      <div class="sec-col">
-        <h3><em>IN</em> THE BROWSER</h3>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>Zero telemetry.</b> Nothing in the code phones home — there is no analytics, reporting or vendor cloud anywhere.</div></div>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>Local-first storage.</b> Bookmarks, history, shortcuts, chats and settings are plain JSON in <code>%LocalAppData%\Pyxis</code> — readable and deletable by you.</div></div>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>Tracker blocking.</b> EasyList + EasyPrivacy filters cut third-party trackers at the network layer, plus cosmetic hiding.</div></div>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>Clean links.</b> Copy strips <code>utm_*</code>, <code>fbclid</code>, <code>gclid</code> and other tracking params before sharing.</div></div>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>One-key wipe.</b> Clear site data removes cookies, site storage, HTTP cache, browsing and download history — behind a confirm dialog.</div></div>
-        <div class="sec-item"><span class="glyph">+</span>
-          <div><b>Real incognito.</b> Incognito tabs use a separate in-memory WebView2 profile — nothing is persisted, ever.</div></div>
-      </div>
-      <div class="sec-col">
-        <h3>KNOWN <em>EDGES</em></h3>
-        <div class="sec-item warn"><span class="glyph">−</span>
-          <div><b>Default search is Google.</b> Queries go to Google unless you change engines — the engine sees your searches.</div></div>
-        <div class="sec-item warn"><span class="glyph">−</span>
-          <div><b>SmartScreen.</b> WebView2's safe-browsing check may report URLs to Microsoft; it can be disabled per profile.</div></div>
-        <div class="sec-item warn"><span class="glyph">−</span>
-          <div><b>Start-page weather.</b> The weather card calls wttr.in, exposing your public IP to that service.</div></div>
-        <div class="sec-item warn"><span class="glyph">−</span>
-          <div><b>No anonymity layer.</b> Your ISP sees your traffic — Pyxis doesn't hide you, it doesn't hide from you.</div></div>
-      </div>
+  </div>
+</section>
+
+<!-- ================= STATEMENT ================= -->
+<section class="statement">
+  <div class="wrap">
+    <p class="big">0 telemetry.<br>0 account.<br><em>100% yours.</em></p>
+  </div>
+</section>
+
+<!-- ================= SERVICE NOTES ================= -->
+<section id="notes">
+  <div class="wrap">
+    <h2 class="sec-title">Service notes</h2>
+    <p class="sec-note">Honest edges — the things a spec page shouldn't hide.</p>
+    <div class="board">
+      <div class="board-head"><span class="dot"></span>ADVISORIES · READ BEFORE BOARDING</div>
+      <div class="note-row"><span class="tag">UNSIGNED</span><span class="txt"><b>SmartScreen will warn.</b> Unsigned build — right-click → properties → unblock. A code-signing cert costs real money; this is a personal project.</span></div>
+      <div class="note-row"><span class="tag">EXTENSIONS</span><span class="txt"><b>None.</b> WebView2 can't run Chrome extensions. Ad blocking and clean links are built in to cover the common cases.</span></div>
+      <div class="note-row"><span class="tag">ENGINE</span><span class="txt"><b>Chromium via WebView2.</b> Same rendering engine as Edge — not a full Chromium fork.</span></div>
+      <div class="note-row"><span class="tag">BETA</span><span class="txt"><b>One developer, one machine.</b> Bugs get fixed; report them on GitHub.</span></div>
     </div>
   </div>
 </section>
 
 <!-- ================= FAQ ================= -->
-<section class="section" id="faq">
+<section id="faq">
   <div class="wrap">
-    <div class="section-head">
-      <h2>Questions</h2>
-      <span class="label">FAQ</span>
-    </div>
-    <details open>
-      <summary>Is Pyxis real Chromium?</summary>
-      <p>Pyxis renders with the same Chromium engine as Microsoft Edge via WebView2 — Blink layout, V8 JavaScript, full HTML5. It's not a fork of Google Chrome, so Chrome UI features and extensions aren't carried over.</p>
-    </details>
-    <details>
-      <summary>Does Pyxis send my data anywhere?</summary>
-      <p>No. There is no account, no sync service, no analytics. Bookmarks, history, shortcuts and settings are JSON files in <code>%LocalAppData%\Pyxis</code> — readable and deletable by you at any time.</p>
-    </details>
-    <details>
-      <summary>Can I install Chrome extensions?</summary>
-      <p>No — WebView2 doesn't support Chrome extensions. Built-in replacements cover the common cases: ad blocking, screenshots, clean-link copying and incognito are already inside.</p>
-    </details>
-    <details>
-      <summary>Is it Windows-only?</summary>
-      <p>Yes. The shell is WPF (.NET 8) and WebView2 is a Windows technology. macOS or Linux support would require a different stack entirely.</p>
-    </details>
+    <h2 class="sec-title">Info desk</h2>
     <details>
       <summary>Is it free?</summary>
-      <p>Yes — it's a personal project, source available on GitHub. Download the release, run the exe, done.</p>
+      <p>Yes — it's a personal project, source available on GitHub. Download, run the installer, done.</p>
+    </details>
+    <details>
+      <summary>Where does my data go?</summary>
+      <p>Bookmarks, history and settings are JSON files in %LocalAppData%\Pyxis. Readable, deletable, yours. Nothing is sent anywhere — there is no account and no sync service to send it to.</p>
+    </details>
+    <details>
+      <summary>Is it based on Chrome?</summary>
+      <p>Same engine — Chromium via WebView2, so pages render like Edge. The shell is our own .NET 8 app, not a Chromium fork.</p>
+    </details>
+    <details>
+      <summary>What about the AI sidebar?</summary>
+      <p>Optional and off by default — bring your own Groq API key. No key means it never runs and never talks to anyone.</p>
+    </details>
+    <details>
+      <summary>Does it update itself?</summary>
+      <p>It checks the release channel on startup and offers to download the new installer — it never installs anything without your click.</p>
     </details>
   </div>
 </section>
 
-<!-- ================= CLOSING ================= -->
-<section class="section closing">
+<!-- ================= FINAL ================= -->
+<section class="final">
   <div class="wrap">
-    <div class="label">READY?</div>
-    <a class="cta" href="/download">Download for Windows</a>
+    <div class="board">
+      <div class="board-head"><span class="dot"></span>FINAL CALL</div>
+      <div class="brow"><span class="no">PYXIS</span><span class="dest">FOR WINDOWS — FREE, LOCAL-FIRST</span><span class="st on">BOARDING</span></div>
+      <div class="brow clickable" onclick="location.href='/download'">
+        <span class="no">GATE A</span><span class="dest" style="color:var(--amber);font-weight:700">BOARD NOW → DOWNLOAD .EXE</span><span class="st">52 MB</span>
+      </div>
+    </div>
   </div>
 </section>
 
 <footer>
-  <div class="wrap" style="justify-content:center">
-    <span class="label">© 2026 PYXIS</span>
+  <div class="wrap">
+    <span>© 2026 PYXIS · LOCAL-FIRST</span>
+    <span class="mono">PLATFORM: WIN-X64 · ENGINE: WEBVIEW2</span>
   </div>
 </footer>
 
 <script>
-/* FAQ accordion — height-animated expand/collapse on <details>. */
-document.querySelectorAll('details').forEach(function(d){
-  var sum=d.querySelector('summary'),body=d.querySelector('p');
-  sum.addEventListener('click',function(e){
-    e.preventDefault();
-    if(d.open){                                   /* collapse */
-      var from=d.offsetHeight,to=sum.offsetHeight;
-      d.animate({height:[from+'px',to+'px']},{duration:200,easing:'ease'});
-      if(body)body.animate({opacity:[1,0]},{duration:160,easing:'ease'});
-      setTimeout(function(){d.open=false;},190);
-    }else{                                        /* expand */
-      d.open=true;
-      var from=sum.offsetHeight,to=d.offsetHeight;
-      d.style.height=from+'px';
-      d.animate({height:[from+'px',to+'px']},{duration:240,easing:'ease'})
-        .onfinish=function(){d.style.height='auto';};
-      if(body)body.animate({opacity:[0,1],transform:['translateY(-4px)','translateY(0)']},
-        {duration:220,easing:'ease'});
-    }
+  // Split-flap: cycle each status row through its word list with a
+  // letter-scramble settle, staggered so the board feels mechanical.
+  document.querySelectorAll('.flip').forEach((el, i) => {
+    const words = el.dataset.words.split('|');
+    let idx = 0;
+    const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    setInterval(() => {
+      idx = (idx + 1) % words.length;
+      const target = words[idx];
+      let frame = 0;
+      const timer = setInterval(() => {
+        frame++;
+        el.textContent = target.split('').map((c, j) =>
+          c === ' ' ? ' ' : (j < frame * 1.4 ? c : CH[Math.random() * CH.length | 0])
+        ).join('');
+        if (frame * 1.4 >= target.length) { el.textContent = target; clearInterval(timer); }
+      }, 30);
+    }, 6000 + i * 1400);
   });
-});
-
 </script>
 </body>
 </html>
