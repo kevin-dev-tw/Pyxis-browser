@@ -6,284 +6,334 @@
 <meta name="google-site-verification" content="ikA4eMUhLTjnxBSzCa1RpgmEg5SL_scysFac4hD4b-k" />
 <title>Pyxis — a local-first browser for Windows</title>
 <style>
-  @font-face{font-family:'JBM';src:local('JetBrains Mono');}
   :root{
-    --board:#101013; --panel:#17181b; --panel2:#1d1f23; --line:#2a2d33; --line2:#34373d;
-    --ink:#e8eaed; --ink-dim:#9aa0a6; --ink-faint:#5f6368;
-    --amber:#e0703a; --amber-dim:rgba(224,112,58,.14); --amber-glow:rgba(224,112,58,.35);
+    --bg:#fafafa; --surface:#ffffff; --line:#e5e5e5; --line2:#d4d4d4;
+    --ink:#171717; --ink2:#525252; --mute:#8a8a8a;
+    --ember:#e0703a; --ember-hover:#c75f2e; --ember-deep:#b8532a; --ember-soft:#fdf1ea;
+    --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
     --mono:"JetBrains Mono","Cascadia Code",ui-monospace,Consolas,monospace;
-    --sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{background:var(--board);color:var(--ink);font-family:var(--sans);
-    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
-  ::selection{background:var(--amber-dim);color:var(--ink)}
-  ::-webkit-scrollbar{width:10px;height:10px}
-  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;border:2px solid var(--board)}
-  :focus-visible{outline:1.5px solid var(--amber);outline-offset:3px;border-radius:2px}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--ember);color:#fff}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+  :focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;width:100%}
   .mono{font-family:var(--mono)}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 
-  /* ---------- top strip ---------- */
-  .strip{position:sticky;top:0;z-index:50;background:rgba(16,16,19,.92);
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .strip .wrap{display:flex;align-items:center;height:52px}
-  .strip .brand{font-family:var(--mono);font-size:13px;letter-spacing:.22em;color:var(--ink);text-decoration:none}
-  .strip .brand b{color:var(--amber);font-weight:700}
-  .strip .brand{flex-shrink:0}
-  .strip nav{margin-left:auto;display:flex;gap:2px;overflow-x:auto;
-    scrollbar-width:none;-ms-overflow-style:none;flex-shrink:1}
-  .strip nav::-webkit-scrollbar{display:none}
-  .strip nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-dim);text-decoration:none;padding:6px 12px;border-radius:4px;transition:.15s;
-    white-space:nowrap}
-  .strip nav a:hover{color:var(--ink);background:var(--panel2)}
-
-  /* ---------- the board ---------- */
-  .board{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    box-shadow:0 12px 40px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.03);
-    overflow:hidden}
-  .board-head{display:flex;align-items:center;gap:10px;
-    padding:10px 18px;border-bottom:1px solid var(--line);
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase}
-  .board-head .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);
-    box-shadow:0 0 8px var(--amber-glow);animation:pulse 2.4s infinite}
-  @keyframes pulse{50%{opacity:.35}}
-  .brow{display:flex;align-items:baseline;gap:16px;
-    padding:11px 18px;border-bottom:1px solid var(--line);
-    font-family:var(--mono);transition:background .15s}
-  .brow:last-child{border-bottom:none}
-  .brow .no{font-size:11px;color:var(--amber);width:64px;flex-shrink:0;letter-spacing:.05em}
-  .brow .dest{flex:1;font-size:13px;letter-spacing:.06em;color:var(--ink)}
-  .brow .st{font-size:11.5px;letter-spacing:.1em;color:var(--ink-dim);text-align:right;min-width:120px}
-  .brow .st.on{color:var(--amber)}
-  .brow.clickable{cursor:pointer}
-  .brow.clickable:hover{background:var(--panel2)}
-
-  /* ---------- hero ---------- */
-  .hero{padding:72px 0 56px}
-  .hero-title{font-family:var(--mono);font-size:clamp(56px,10vw,110px);font-weight:700;
-    letter-spacing:-.02em;line-height:.95;color:var(--ink)}
-  .hero-title span{color:var(--amber)}
-  .hero-sub{font-family:var(--mono);font-size:clamp(13px,1.6vw,16px);color:var(--ink-dim);
-    letter-spacing:.14em;margin-top:18px}
-  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start}
-  @media(max-width:840px){.hero-grid{grid-template-columns:1fr;gap:32px}}
-  .hero-board{margin-top:34px}
-  .hero-cta{display:flex;gap:14px;align-items:center;margin-top:28px;flex-wrap:wrap}
-  .cta-btn{font-family:var(--mono);font-size:13px;letter-spacing:.08em;
-    background:var(--amber);color:#101013;border:none;border-radius:8px;
-    padding:13px 26px;cursor:pointer;text-decoration:none;display:inline-flex;
-    align-items:center;gap:8px;font-weight:700;transition:.15s}
-  .cta-btn:hover{background:#f0874f;transform:translateY(-1px);box-shadow:0 6px 20px -4px var(--amber-glow)}
-  .warn{margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--amber);
-    border:1px solid rgba(224,112,58,.35);background:var(--amber-dim);
-    border-radius:6px;padding:9px 14px;display:inline-block}
-  .shot{margin-top:34px;border:1px solid var(--line);border-radius:10px;overflow:hidden;
-    box-shadow:0 16px 48px -16px rgba(0,0,0,.7)}
-  .shot img{width:100%;display:block}
-  .shot figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-faint);
-    padding:8px 14px;background:var(--panel);border-top:1px solid var(--line)}
+  /* ---------- nav ---------- */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;
+    background:rgba(250,250,250,.85);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;height:56px;max-width:none;padding:0 28px}
+  nav .logo{font-size:15px;font-weight:700;letter-spacing:-.01em;
+    color:var(--ink);text-decoration:none}
+  nav .logo i{font-style:normal;color:var(--ember)}
+  nav .links{margin-left:auto;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+  nav .links::-webkit-scrollbar{display:none}
+  nav .links a{font-size:13.5px;color:var(--ink2);text-decoration:none;
+    padding:7px 13px;border-radius:6px;transition:.15s;white-space:nowrap}
+  nav .links a:hover{color:var(--ink);background:#f0f0f0}
+  nav .links a.cta{color:#fff;background:var(--ink)}
+  nav .links a.cta:hover{background:var(--ember)}
+  /* hamburger — hidden on desktop */
+  .burger{display:none;flex-direction:column;justify-content:center;gap:5px;
+    width:38px;height:38px;margin-left:auto;padding:9px;cursor:pointer;
+    background:transparent;border:1px solid var(--line);border-radius:8px}
+  .burger span{display:block;height:1.5px;background:var(--ink);transition:.2s}
+  nav.open .burger span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+  nav.open .burger span:nth-child(2){opacity:0}
+  nav.open .burger span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+  @media(max-width:840px){
+    .burger{display:flex}
+    nav .links{display:none;position:absolute;top:56px;left:0;right:0;
+      flex-direction:column;gap:0;margin:0;background:var(--bg);
+      border-bottom:1px solid var(--line);padding:8px 0}
+    nav.open .links{display:flex}
+    nav .links a{font-size:16px;font-weight:600;color:var(--ink);
+      padding:14px 28px;border-radius:0;border-bottom:1px solid var(--line)}
+    nav .links a:last-of-type{border-bottom:none}
+    nav .links a.cta{color:var(--ember);background:transparent;font-weight:700}
+    nav .links a.cta:hover{background:var(--ember-soft)}
+  }
 
   /* ---------- sections ---------- */
-  section{padding:56px 0}
-  .sec-title{font-family:var(--mono);font-size:clamp(24px,4vw,38px);font-weight:700;
-    letter-spacing:-.01em;color:var(--ink);margin-bottom:8px}
-  .sec-note{font-size:14px;color:var(--ink-dim);max-width:560px;margin-bottom:28px}
-  .flipboard .brow{font-size:14px}
-  .flipboard .brow .dest{font-size:14px}
+  section{min-height:100vh;display:flex;align-items:center;
+    padding:80px 0;position:relative}
+  section + section{border-top:1px solid var(--line)}
 
-  /* big statement board */
-  .statement{padding:44px 0}
-  .statement .big{font-family:var(--mono);font-size:clamp(30px,5.4vw,60px);font-weight:700;
-    line-height:1.15;letter-spacing:-.01em}
-  .statement .big em{font-style:normal;color:var(--amber)}
+  /* ---------- S1 · hero — left type stack, screenshot bleeding right ---------- */
+  .hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:center}
+  .hero-copy{padding-right:40px}
+  .hero-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ember);margin-bottom:26px}
+  .hero h1{font-size:clamp(46px,5.6vw,76px);font-weight:700;
+    letter-spacing:-.04em;line-height:1.02}
+  .hero h1 i{font-style:normal;color:var(--ember)}
+  .hero .sub{font-size:17px;color:var(--ink2);margin-top:24px;max-width:420px}
+  .hero .actions{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap}
+  .btn{font-size:14.5px;font-weight:600;text-decoration:none;cursor:pointer;
+    border-radius:8px;padding:13px 26px;transition:.15s;display:inline-block}
+  .btn-primary{background:var(--ember);color:#fff}
+  .btn-primary:hover{background:var(--ember-hover)}
+  .btn-line{color:var(--ink2);border:1px solid var(--line2)}
+  .btn-line:hover{color:var(--ink);border-color:var(--ink2)}
+  .hero .warn{margin-top:28px;font-family:var(--mono);font-size:11.5px;
+    color:var(--ink2);border-left:2px solid var(--ember);
+    padding:4px 0 4px 14px}
+  .hero-shot{position:relative}
+  .hero-shot img{width:100%;display:block;
+    border:1px solid var(--line);border-radius:14px}
 
-  /* service notes (known edges) */
-  .note-row{display:flex;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line);
-    font-family:var(--mono);font-size:12.5px;align-items:baseline}
-  .note-row:last-child{border-bottom:none}
-  .note-row .tag{width:110px;flex-shrink:0;font-size:10.5px;letter-spacing:.12em;color:var(--ink-faint)}
-  .note-row .txt{color:var(--ink-dim)}
-  .note-row .txt b{color:var(--ink);font-weight:600}
+  /* ---------- S2 · features — sticky left rail + tall index rows ---------- */
+  .features .wrap{display:grid;grid-template-columns:300px 1fr;gap:80px;align-items:start}
+  .rail{position:sticky;top:120px}
+  .rail .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ember);margin-bottom:16px}
+  .rail h2{font-size:clamp(34px,3.6vw,52px);font-weight:700;
+    letter-spacing:-.03em;line-height:1.05}
+  .rail p{font-size:15px;color:var(--ink2);margin-top:18px;max-width:240px}
+  .frow{display:grid;grid-template-columns:64px 1fr auto;gap:20px;
+    align-items:baseline;padding:26px 0;border-bottom:1px solid var(--line)}
+  .frow:first-child{padding-top:8px}
+  .frow .num{font-family:var(--mono);font-size:13px;color:var(--mute)}
+  .frow h3{font-size:20px;font-weight:650;letter-spacing:-.015em}
+  .frow p{font-size:14px;color:var(--ink2);margin-top:6px;max-width:520px}
+  .frow .key{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+    color:var(--ember);border:1px solid var(--ember);
+    border-radius:99px;padding:3px 11px;white-space:nowrap}
+  @media(max-width:900px){
+    .features .wrap{grid-template-columns:1fr;gap:24px}
+    .rail{position:static}
+    .frow{grid-template-columns:48px 1fr}
+    .frow .key{display:none}
+  }
 
-  /* faq */
-  details{border-bottom:1px solid var(--line);padding:16px 4px}
-  summary{font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;list-style:none;
-    display:flex;justify-content:space-between;align-items:baseline}
-  summary::-webkit-details-marker{display:none}
-  summary::after{content:"+";font-family:var(--mono);font-size:15px;color:var(--ink-faint)}
-  details[open] summary::after{content:"–"}
-  details p{padding:12px 0 4px;font-size:13.5px;color:var(--ink-dim);max-width:680px}
+  /* ---------- S3 · full-ember statement ---------- */
+  .statement{background:var(--ember);color:#fff}
+  .statement .wrap{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+  .statement .big{font-size:clamp(44px,7.5vw,104px);font-weight:700;
+    letter-spacing:-.04em;line-height:1.02}
+  .statement .big span{display:block}
+  .statement .big s{text-decoration:none;color:var(--ink)}
+  .statement .foot{font-family:var(--mono);font-size:12px;letter-spacing:.18em;
+    color:rgba(255,255,255,.75);margin-top:48px;text-transform:uppercase}
 
-  /* final + footer */
-  .final{text-align:left;padding:64px 0}
-  .final .board{max-width:720px}
-  footer{border-top:1px solid var(--line);padding:22px 0}
-  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-  footer span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-faint)}
+  /* ---------- S4 · local-first mechanics — three flat columns ---------- */
+  .how .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:56px}
+  .how .col .glyph{font-family:var(--mono);font-size:12px;color:var(--ember);
+    letter-spacing:.14em;margin-bottom:20px}
+  .how .col h3{font-size:clamp(24px,2.6vw,34px);font-weight:700;
+    letter-spacing:-.025em;line-height:1.1}
+  .how .col p{font-size:14.5px;color:var(--ink2);margin-top:16px}
+  .how .col code{font-family:var(--mono);font-size:12px;background:#f0f0f0;
+    padding:2px 7px;border-radius:4px}
+  @media(max-width:840px){.how .wrap{grid-template-columns:1fr;gap:44px}}
 
+  /* ---------- S5 · service notes — flat spec table ---------- */
+  .notes .sec-head{margin-bottom:44px}
+  .sec-head .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ember);margin-bottom:14px}
+  .sec-head h2{font-size:clamp(32px,4vw,50px);font-weight:700;letter-spacing:-.03em}
+  .spec{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+  .spec .row{display:grid;grid-template-columns:180px 1fr;
+    border-bottom:1px solid var(--line)}
+  .spec .row:last-child{border-bottom:none}
+  .spec .cell{padding:20px 24px;font-size:14px}
+  .spec .cell:first-child{font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
+    border-right:1px solid var(--line);display:flex;align-items:center}
+  .spec .cell:last-child{color:var(--ink2)}
+  .spec .cell b{color:var(--ink);font-weight:600}
+  @media(max-width:640px){.spec .row{grid-template-columns:1fr}
+    .spec .cell:first-child{border-right:none;border-bottom:1px solid var(--line);padding:12px 24px}}
+
+  /* ---------- S6 · faq — static two-col Q&A, no accordion ---------- */
+  .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px 72px}
+  .qa h4{font-size:16.5px;font-weight:650;letter-spacing:-.01em;
+    padding-bottom:12px;border-bottom:2px solid var(--ink);display:inline-block}
+  .qa p{font-size:14px;color:var(--ink2);margin-top:14px}
+  .qa code{font-family:var(--mono);font-size:12px;background:#f0f0f0;
+    padding:2px 6px;border-radius:4px}
+  @media(max-width:760px){.faq-grid{grid-template-columns:1fr}}
+
+  /* ---------- S7 · final — oversized CTA band ---------- */
+  .final .wrap{display:flex;flex-direction:column;align-items:flex-start}
+  .final .label{font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--mute);margin-bottom:24px}
+  .final h2{font-size:clamp(56px,10vw,140px);font-weight:700;
+    letter-spacing:-.045em;line-height:.9}
+  .final h2 i{font-style:normal;color:var(--ember)}
+  .final .actions{display:flex;gap:14px;margin-top:48px;flex-wrap:wrap}
+  .final .note{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:24px}
+
+  footer{border-top:1px solid var(--line);padding:24px 0}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer span{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    color:var(--mute);text-transform:uppercase}
+
+  @media(max-width:840px){
+    .hero .wrap{grid-template-columns:1fr;gap:36px}
+  }
   @media(max-width:640px){
-    .hero{padding:44px 0 36px}
-    .brow .st{min-width:84px;font-size:10px}
-    .strip .brand{font-size:12px;letter-spacing:.14em}
-    .strip nav a{padding:6px 9px;font-size:10px;letter-spacing:.08em}
+    section{min-height:auto;padding:72px 0}
+    .hero{min-height:100vh}
+    .final .actions .btn{width:100%;text-align:center}
   }
 </style>
 </head>
 <body>
 
-<div class="strip">
+<nav>
   <div class="wrap">
-    <a class="brand" href="#">PYXIS<b>_</b>TERMINAL</a>
-    <nav>
-      <a href="#routes">Routes</a>
-      <a href="#notes">Service notes</a>
-      <a href="#faq">Info</a>
+    <a class="logo" href="#">PYXIS<i>.</i></a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#local">Local-first</a>
+      <a href="#notes">Notes</a>
+      <a href="#faq">FAQ</a>
       <a href="brand.html">Brand</a>
-    </nav>
+      <a class="cta" href="/download">Download</a>
+    </div>
+    <button class="burger" aria-label="Menu" aria-expanded="false"
+      onclick="this.parentElement.parentElement.classList.toggle('open');
+               this.setAttribute('aria-expanded', this.parentElement.parentElement.classList.contains('open'))">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-</div>
+</nav>
 
-<!-- ================= HERO ================= -->
+<!-- ============ S1 · HERO ============ -->
 <section class="hero">
   <div class="wrap">
-    <div class="hero-grid">
-      <div>
-        <h1 class="hero-title">PYXIS<span>.</span></h1>
-        <p class="hero-sub">A LOCAL-FIRST BROWSER FOR WINDOWS</p>
-
-        <div class="board hero-board">
-          <div class="board-head"><span class="dot"></span>GATE A · LIVE STATUS</div>
-          <div class="brow"><span class="no">DATA</span><span class="dest flip" data-words="STAYS ON YOUR DISK|NEVER UPLOADED|READABLE JSON">STAYS ON YOUR DISK</span><span class="st on">LOCAL</span></div>
-          <div class="brow"><span class="no">ACCT</span><span class="dest flip" data-words="NONE REQUIRED|NOTHING TO SIGN INTO">NONE REQUIRED</span><span class="st">—</span></div>
-          <div class="brow"><span class="no">TELM</span><span class="dest flip" data-words="ZERO TELEMETRY|NOTHING PHONES HOME">ZERO TELEMETRY</span><span class="st on">OFF</span></div>
-          <div class="brow"><span class="no">SYNC</span><span class="dest flip" data-words="NO CLOUD, BY DESIGN|YOUR FILES, YOUR MACHINE">NO CLOUD, BY DESIGN</span><span class="st">—</span></div>
-        </div>
-
-        <div class="hero-cta">
-          <a class="cta-btn" href="/download">BOARD NOW → .EXE</a>
-        </div>
-        <div class="warn">unsigned build — if Windows blocks it: right-click → properties → unblock</div>
+    <div class="hero-copy">
+      <div class="hero-kicker">A browser for Windows</div>
+      <h1>Your browser.<br>Your disk<i>.</i></h1>
+      <p class="sub">Pyxis is a local-first browser. No account, no sync, no telemetry — bookmarks and history live on your machine.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/download">Download for Windows</a>
+        <a class="btn btn-line" href="#features">See features</a>
       </div>
-
-      <figure class="shot">
-        <img src="screenshot.png" alt="Pyxis browser showing the start page">
-        <figcaption>PYX TERMINAL — LIVE UI SPECIMEN</figcaption>
-      </figure>
+      <div class="warn">unsigned build — if Windows blocks it: right-click → properties → unblock</div>
+    </div>
+    <div class="hero-shot">
+      <img src="screenshot.png" alt="Pyxis browser start page">
     </div>
   </div>
 </section>
 
-<!-- ================= ROUTES ================= -->
-<section id="routes">
+<!-- ============ S2 · FEATURES ============ -->
+<section class="features" id="features">
   <div class="wrap">
-    <h2 class="sec-title">Routes</h2>
-    <p class="sec-note">Every feature runs locally. Nothing on this board leaves the machine.</p>
-    <div class="board flipboard">
-      <div class="board-head"><span class="dot"></span>DEPARTURES · ON TIME</div>
-      <div class="brow"><span class="no">PYX-01</span><span class="dest">ADAPTIVE TAB STRIP — WIDTH-ANIMATED</span><span class="st on">READY</span></div>
-      <div class="brow"><span class="no">PYX-02</span><span class="dest">SPLIT VIEW — TWO PAGES, ONE TAB</span><span class="st on">CTRL+\</span></div>
-      <div class="brow"><span class="no">PYX-03</span><span class="dest">EASYLIST + EASYPRIVACY AD BLOCKING</span><span class="st on">BUILT-IN</span></div>
-      <div class="brow"><span class="no">PYX-04</span><span class="dest">ZEN MODE — JUST THE PAGE</span><span class="st on">CTRL+SHIFT+Z</span></div>
-      <div class="brow"><span class="no">PYX-05</span><span class="dest">BOOKMARKS — FOLDERS, MANAGER, DRAG &amp; DROP</span><span class="st on">LOCAL</span></div>
-      <div class="brow"><span class="no">PYX-06</span><span class="dest">AI SIDEBAR — GROQ, YOUR OWN KEY</span><span class="st">OPTIONAL</span></div>
-      <div class="brow"><span class="no">PYX-07</span><span class="dest">SCREENSHOT → PNG · CLEAN-LINK COPY · SITE WIPE</span><span class="st on">READY</span></div>
-      <div class="brow"><span class="no">PYX-08</span><span class="dest">SESSION RESTORE · PINNED TABS · AUTO-UPDATE</span><span class="st on">READY</span></div>
+    <div class="rail">
+      <div class="kicker">Features</div>
+      <h2>Built for how you actually browse.</h2>
+      <p>Every feature runs locally. Nothing on this list phones home.</p>
+    </div>
+    <div class="flist">
+      <div class="frow"><span class="num">01</span><div><h3>Adaptive tab strip</h3><p>Tabs resize fluidly as you open and close; pin the ones you keep — they shrink to favicons on the left.</p></div><span class="key">ALWAYS ON</span></div>
+      <div class="frow"><span class="num">02</span><div><h3>Split view</h3><p>Two pages side by side in one tab — research and source, docs and code.</p></div><span class="key">CTRL+\</span></div>
+      <div class="frow"><span class="num">03</span><div><h3>Incognito tabs</h3><p>A private tab lives inside the same window — no separate window to juggle, nothing written to history.</p></div><span class="key">CTRL+SHIFT+N</span></div>
+      <div class="frow"><span class="num">04</span><div><h3>Ad blocking</h3><p>EasyList + EasyPrivacy filters baked into the engine. No extension, no account.</p></div><span class="key">BUILT-IN</span></div>
+      <div class="frow"><span class="num">05</span><div><h3>Bookmarks, properly</h3><p>Folders, drag-and-drop grouping, a real manager page, overflow menu and middle-click batch open.</p></div><span class="key">CTRL+SHIFT+O</span></div>
+      <div class="frow"><span class="num">06</span><div><h3>Zen mode &amp; fullscreen</h3><p>Chrome and tabs fold away for just the page — or go borderless fullscreen.</p></div><span class="key">F11 / CTRL+SHIFT+Z</span></div>
+      <div class="frow"><span class="num">07</span><div><h3>Screenshot, clean links, site wipe</h3><p>Full-page PNG capture, one-click copy without tracking junk, per-site data clearing.</p></div><span class="key">BUILT-IN</span></div>
+      <div class="frow"><span class="num">08</span><div><h3>Session restore</h3><p>Opt-in "continue where you left off" — off by default, your call.</p></div><span class="key">SETTINGS</span></div>
+      <div class="frow"><span class="num">09</span><div><h3>Dark &amp; light themes</h3><p>Both palettes built in, switched live — plus bilingual English / Traditional Chinese UI.</p></div><span class="key">EN / 繁中</span></div>
     </div>
   </div>
 </section>
 
-<!-- ================= STATEMENT ================= -->
+<!-- ============ S3 · EMBER STATEMENT ============ -->
 <section class="statement">
   <div class="wrap">
-    <p class="big">0 telemetry.<br>0 account.<br><em>100% yours.</em></p>
+    <p class="big"><span>0 telemetry.</span><span>0 account.</span><span><s>100% yours.</s></span></p>
+    <div class="foot">local-first · no sync service · readable json on your disk</div>
   </div>
 </section>
 
-<!-- ================= SERVICE NOTES ================= -->
-<section id="notes">
+<!-- ============ S4 · HOW LOCAL-FIRST WORKS ============ -->
+<section class="how" id="local">
   <div class="wrap">
-    <h2 class="sec-title">Service notes</h2>
-    <p class="sec-note">Honest edges — the things a spec page shouldn't hide.</p>
-    <div class="board">
-      <div class="board-head"><span class="dot"></span>ADVISORIES · READ BEFORE BOARDING</div>
-      <div class="note-row"><span class="tag">UNSIGNED</span><span class="txt"><b>SmartScreen will warn.</b> Unsigned build — right-click → properties → unblock. A code-signing cert costs real money; this is a personal project.</span></div>
-      <div class="note-row"><span class="tag">EXTENSIONS</span><span class="txt"><b>None.</b> WebView2 can't run Chrome extensions. Ad blocking and clean links are built in to cover the common cases.</span></div>
-      <div class="note-row"><span class="tag">ENGINE</span><span class="txt"><b>Chromium via WebView2.</b> Same rendering engine as Edge — not a full Chromium fork.</span></div>
-      <div class="note-row"><span class="tag">BETA</span><span class="txt"><b>One developer, one machine.</b> Bugs get fixed; report them on GitHub.</span></div>
+    <div class="col">
+      <div class="glyph">01 / FILES</div>
+      <h3>Everything is a file you can open.</h3>
+      <p>Bookmarks, history and settings are JSON in <code>%LocalAppData%\Pyxis</code> — readable, editable, deletable.</p>
+    </div>
+    <div class="col">
+      <div class="glyph">02 / NO SERVER</div>
+      <h3>There is nothing to sync to.</h3>
+      <p>No account system exists — so nothing can be uploaded, leaked, or sold. The sync service was never built.</p>
+    </div>
+    <div class="col">
+      <div class="glyph">03 / YOUR CALL</div>
+      <h3>Uninstall takes the data question with it.</h3>
+      <p>Delete the folder and every trace is gone. No remote account to deactivate, no data to request back.</p>
     </div>
   </div>
 </section>
 
-<!-- ================= FAQ ================= -->
+<!-- ============ S5 · SERVICE NOTES ============ -->
+<section class="notes" id="notes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Service notes</div>
+      <h2>Honest edges.</h2>
+    </div>
+    <div class="spec">
+      <div class="row"><div class="cell">unsigned</div><div class="cell"><b>SmartScreen will warn.</b> Unsigned build — right-click → properties → unblock. A code-signing cert costs real money; this is a personal project.</div></div>
+      <div class="row"><div class="cell">extensions</div><div class="cell"><b>None.</b> WebView2 can't run Chrome extensions. Ad blocking and clean links are built in to cover the common cases.</div></div>
+      <div class="row"><div class="cell">engine</div><div class="cell"><b>Chromium via WebView2.</b> Same rendering engine as Edge — not a full Chromium fork.</div></div>
+      <div class="row"><div class="cell">beta</div><div class="cell"><b>One developer, one machine.</b> Bugs get fixed; report them on GitHub.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S6 · FAQ ============ -->
 <section id="faq">
   <div class="wrap">
-    <h2 class="sec-title">Info desk</h2>
-    <details>
-      <summary>Is it free?</summary>
-      <p>Yes — it's a personal project, source available on GitHub. Download, run the installer, done.</p>
-    </details>
-    <details>
-      <summary>Where does my data go?</summary>
-      <p>Bookmarks, history and settings are JSON files in %LocalAppData%\Pyxis. Readable, deletable, yours. Nothing is sent anywhere — there is no account and no sync service to send it to.</p>
-    </details>
-    <details>
-      <summary>Is it based on Chrome?</summary>
-      <p>Same engine — Chromium via WebView2, so pages render like Edge. The shell is our own .NET 8 app, not a Chromium fork.</p>
-    </details>
-    <details>
-      <summary>What about the AI sidebar?</summary>
-      <p>Optional and off by default — bring your own Groq API key. No key means it never runs and never talks to anyone.</p>
-    </details>
-    <details>
-      <summary>Does it update itself?</summary>
-      <p>It checks the release channel on startup and offers to download the new installer — it never installs anything without your click.</p>
-    </details>
+    <div class="sec-head">
+      <div class="kicker">FAQ</div>
+      <h2>Straight answers.</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="qa"><h4>Is it free?</h4><p>Yes — it's a personal project, source available on GitHub. Download, run the installer, done.</p></div>
+      <div class="qa"><h4>Where does my data go?</h4><p>JSON files in <code>%LocalAppData%\Pyxis</code>. Nothing is sent anywhere — there is no account and no sync service to send it to.</p></div>
+      <div class="qa"><h4>Is it based on Chrome?</h4><p>Same engine — Chromium via WebView2, so pages render like Edge. The shell is our own .NET 8 app, not a Chromium fork.</p></div>
+      <div class="qa"><h4>Does it update itself?</h4><p>It checks the release channel on startup and offers the new installer — it never installs anything without your click.</p></div>
+      <div class="qa"><h4>Can I set it as default?</h4><p>Yes — the welcome screen links straight into Windows default-apps settings, and the installer registers Pyxis as a browser candidate.</p></div>
+    </div>
   </div>
 </section>
 
-<!-- ================= FINAL ================= -->
+<!-- ============ S7 · FINAL ============ -->
 <section class="final">
   <div class="wrap">
-    <div class="board">
-      <div class="board-head"><span class="dot"></span>FINAL CALL</div>
-      <div class="brow"><span class="no">PYXIS</span><span class="dest">FOR WINDOWS — FREE, LOCAL-FIRST</span><span class="st on">BOARDING</span></div>
-      <div class="brow clickable" onclick="location.href='/download'">
-        <span class="no">GATE A</span><span class="dest" style="color:var(--amber);font-weight:700">BOARD NOW → DOWNLOAD .EXE</span><span class="st">52 MB</span>
-      </div>
+    <div class="label">Free · self-contained · 52 MB</div>
+    <h2>Ready to<br>board<i>.</i></h2>
+    <div class="actions">
+      <a class="btn btn-primary" href="/download">Download Pyxis</a>
+      <a class="btn btn-line" href="brand.html">Brand kit</a>
     </div>
+    <div class="note">windows · webview2 · no account required</div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <span>© 2026 PYXIS · LOCAL-FIRST</span>
-    <span class="mono">PLATFORM: WIN-X64 · ENGINE: WEBVIEW2</span>
+    <span>© 2026 Pyxis · local-first</span>
+    <span>platform: win-x64 · engine: webview2</span>
   </div>
 </footer>
 
 <script>
-  // Split-flap: cycle each status row through its word list with a
-  // letter-scramble settle, staggered so the board feels mechanical.
-  document.querySelectorAll('.flip').forEach((el, i) => {
-    const words = el.dataset.words.split('|');
-    let idx = 0;
-    const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    setInterval(() => {
-      idx = (idx + 1) % words.length;
-      const target = words[idx];
-      let frame = 0;
-      const timer = setInterval(() => {
-        frame++;
-        el.textContent = target.split('').map((c, j) =>
-          c === ' ' ? ' ' : (j < frame * 1.4 ? c : CH[Math.random() * CH.length | 0])
-        ).join('');
-        if (frame * 1.4 >= target.length) { el.textContent = target; clearInterval(timer); }
-      }, 30);
-    }, 6000 + i * 1400);
-  });
+  // Close the hamburger menu when a link is tapped.
+  document.querySelectorAll('nav .links a').forEach(a =>
+    a.addEventListener('click', () =>
+      document.querySelector('nav').classList.remove('open')));
 </script>
 </body>
 </html>
